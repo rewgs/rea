@@ -8,17 +8,21 @@ dofile(reaper.GetResourcePath() ..
 -- FIXME: for some reason the following line is crashing Reaper???
 -- local lfs = require("lfs")
 
+-- OLD 
 -- This is a function that enables single-line, relative path imports of other lua files.
 -- Written by Xenakios in this thread: https://forums.cockos.com/showthread.php?t=174073
-local function reaDoFile(file)
-    local info = debug.getinfo(1, 'S')
-    local script_path = info.source:match [[^@?(.*[\/])[^\/]-$]] -- should this not be local?
-    dofile(script_path .. file)
-end
-reaDoFile("modules/file-hierarchy.lua")
-reaDoFile("modules/helper-functions.lua")
-reaDoFile("modules/render-tables.lua")
-reaDoFile("modules/render-functions.lua")
+-- local function reaDoFile(file)
+--     local info = debug.getinfo(1, 'S')
+--     local script_path = info.source:match [[^@?(.*[\/])[^\/]-$]] -- should this not be local?
+--     dofile(script_path .. file)
+-- end
+-- reaDoFile("modules/file-hierarchy.lua")
+-- reaDoFile("modules/helper-functions.lua")
+-- reaDoFile("modules/render-tables.lua")
+-- reaDoFile("modules/render-functions.lua")
+
+-- NEW
+dofile(reaper.GetResourcePath() .. "/Scripts/rewgs-reaper-scripts/modules/init.lua")
 
 
 local project_name_delimiter = " - "
@@ -227,3 +231,4 @@ function main()
 end
 
 main()
+-- reaper.Main_OnCommand(40004, 0) -- closes Reaper

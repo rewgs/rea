@@ -1,3 +1,72 @@
+function get_all_tracks_as_objects()
+    -- returns all tracks in project as an object with the following properties:
+    -- media_track
+    -- number
+    -- name
+    -- depth
+    -- parent
+    -- num_media_items
+    -- is_selected
+    -- unmuted_media_items {
+        -- { media_item, index }
+    -- }
+    -- muted_media_items {
+        -- { media_item, index }
+    -- }
+
+    local all_tracks = {}
+
+    for i = 0, reaper.CountTracks(0) - 1 do
+        local media_track = reaper.GetTrack(0, i)
+
+        -- 0 = normal
+        -- 1 = track is a folder parent
+        -- -1 = track is the last in the innermost folder,
+        -- -2 = track is the last in the innermost and next-innermost folders, etc...
+        local depth = reaper.GetMediaTrackInfo_Value(media_track, "I_FOLDERDEPTH")
+        local _, track_name = reaper.GetTrackName(media_track)
+        local parent = reaper.GetMediaTrackInfo_Value(media_track, "P_PARTRACK")
+        local num_media_items = reaper.CountTrackMediaItems(media_track)
+        local is_selected = reaper.IsTrackSelected(media_track)
+
+        local unmuted_media_items = {}
+        local muted_media_items = {}
+        for m = 0, num_media_items - 1 do
+            local media_item = reaper.GetMediaItem(0, m)
+            local mute_state = reaper.GetMediaItemInfo_Value(media_item, "B_MUTE_ACTUAL")
+
+            local unmuted_media_item_obj = {}
+            local muted_media_item_obj = {}
+            if mute_state == false then
+                unmuted_media_item_obj.media_item = media_item
+                unmuted_media_item_obj.index = m
+                table.insert(unmuted_media_items, unmuted_media_item_obj)
+            else
+                muted_media_item_obj.media_item = media_item
+                muted_media_item_obj.index = m
+                table.insert(muted_media_items, muted_media_item_obj)
+            end
+        end
+
+        local track_obj = {
+            media_track = media_track,
+            number = i,
+            name = track_name,
+            depth = depth,
+            parent = parent,
+            is_selected = is_selected,
+            num_media_items = num_media_items,
+            unmuted_media_items = unmuted_media_items,
+            muted_media_items = muted_media_items
+        }
+
+        table.insert(all_tracks, track_obj)
+    end
+
+    return all_tracks
+end
+
+
 function get_parent_track_name(parent_track)
     for i = 0, reaper.CountTracks(0) - 1 do
         local track = reaper.GetTrack(0, i)
@@ -121,70 +190,6 @@ function create_named_audio_click_track()
     end
 end
 
-function get_all_tracks_as_objects()
-    -- returns all tracks in project as an object with the following properties:
-    -- media_track
-    -- number
-    -- name
-    -- depth
-    -- parent
-    -- num_media_items
-    -- unmuted_media_items {
-    -- { media_item, index }
-    -- }
-    -- muted_media_items {
-    -- { media_item, index }
-    -- }
-
-    local all_tracks = {}
-
-    for i = 0, reaper.CountTracks(0) - 1 do
-        local media_track = reaper.GetTrack(0, i)
-
-        -- 0 = normal
-        -- 1 = track is a folder parent
-        -- -1 = track is the last in the innermost folder,
-        -- -2 = track is the last in the innermost and next-innermost folders, etc...
-        local depth = reaper.GetMediaTrackInfo_Value(media_track, "I_FOLDERDEPTH")
-        local _, track_name = reaper.GetTrackName(media_track)
-        local parent = reaper.GetMediaTrackInfo_Value(media_track, "P_PARTRACK")
-        local num_media_items = reaper.CountTrackMediaItems(media_track)
-
-        local unmuted_media_items = {}
-        local muted_media_items = {}
-        for m = 0, num_media_items - 1 do
-            local media_item = reaper.GetMediaItem(0, m)
-            local mute_state = reaper.GetMediaItemInfo_Value(media_item, "B_MUTE_ACTUAL")
-
-            local unmuted_media_item_obj = {}
-            local muted_media_item_obj = {}
-            if mute_state == false then
-                unmuted_media_item_obj.media_item = media_item
-                unmuted_media_item_obj.index = m
-                table.insert(unmuted_media_items, unmuted_media_item_obj)
-            else
-                muted_media_item_obj.media_item = media_item
-                muted_media_item_obj.index = m
-                table.insert(muted_media_items, muted_media_item_obj)
-            end
-        end
-
-        local track_obj = {
-            media_track = media_track,
-            number = i,
-            name = track_name,
-            depth = depth,
-            parent = parent,
-            num_media_items = num_media_items,
-            unmuted_media_items = unmuted_media_items,
-            muted_media_items = muted_media_items
-        }
-
-        table.insert(all_tracks, track_obj)
-    end
-
-    return all_tracks
-end
 
 function get_skinny_stems(all_tracks)
     local skinny_stems = {}
@@ -334,6 +339,40 @@ function search_up_family_tree(track, table)
             end
 
             -- search_up_family_tree(parent_track, table)
+        end
+    end
+end
+
+
+function is_child(track)
+    if reaper.GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
+        return false
+    else
+        return true
+    end
+end
+
+
+function is_marked(subject, pattern)
+    local start_index, end_index = string.find(subject, pattern)
+    if start_index ~= nil and end_index ~= nil then
+        return true
+    else
+        return false
+    end
+end
+
+
+function toggle_mark_track(mark)
+    for _, track in ipairs(get_all_tracks_as_objects()) do
+        if track.is_selected == true and track.depth < 1 then
+            if is_marked(track.name, mark) then
+                local new_name = track.name:gsub(mark .. " ", "")
+                reaper.GetSetMediaTrackInfo_String(track.media_track, "P_NAME", new_name, true)
+            else
+                local new_name = mark .. ' ' .. track.name
+                reaper.GetSetMediaTrackInfo_String(track.media_track, "P_NAME", new_name, true)
+            end
         end
     end
 end

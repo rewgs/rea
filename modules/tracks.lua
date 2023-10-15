@@ -371,16 +371,19 @@ function toggle_mark_track(mark)
     end
 end
 
-function get_marked_tracks(total_num_tracks, mark)
+function get_marked_tracks(mark)
     local marked_tracks = {}
+    -- for i = 0, total_num_tracks - 1 do
+    --     local track = reaper.GetTrack(0, i)
+    --     local _, track_name = reaper.GetTrackName(track)
+    --     if is_marked(track_name, mark) then
+    --         table.insert(marked_tracks, track_name)
+    --     end
+    -- end
 
-    for i = 0, total_num_tracks - 1 do
-        local track = reaper.GetTrack(0, i)
-        local _, track_name = reaper.GetTrackName(track)
-
-        if is_marked(track_name, mark) then
-            -- reaper.ShowConsoleMsg(track_name .. "\n")
-            table.insert(marked_tracks, track_name)
+    for _, track in ipairs(get_all_tracks_as_objects()) do
+        if is_marked(track.name, mark) then
+            table.insert(marked_tracks, track)
         end
     end
 

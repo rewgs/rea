@@ -3,12 +3,11 @@ dofile(reaper.GetResourcePath() .. "/UserPlugins/ultraschall_api.lua")
 -- https://forums.cockos.com/showthread.php?t=267360
 -- https://github.com/mavriq-dev/Mavriq-Lua-Batteries
 -- ReaPack repo: https://raw.githubusercontent.com/mavriq-dev/public-reascripts/master/index.xml
-dofile(reaper.GetResourcePath() ..
-    "/Scripts/Mavriq ReaScript Repository/Various/Mavriq-Lua-Batteries/batteries_header.lua")
+dofile(reaper.GetResourcePath() .. "/Scripts/Mavriq ReaScript Repository/Various/Mavriq-Lua-Batteries/batteries_header.lua")
 -- FIXME: for some reason the following line is crashing Reaper???
 -- local lfs = require("lfs")
 
--- OLD 
+-- OLD way of importing my own modules
 -- This is a function that enables single-line, relative path imports of other lua files.
 -- Written by Xenakios in this thread: https://forums.cockos.com/showthread.php?t=174073
 -- local function reaDoFile(file)
@@ -21,14 +20,14 @@ dofile(reaper.GetResourcePath() ..
 -- reaDoFile("modules/render-tables.lua")
 -- reaDoFile("modules/render-functions.lua")
 
--- NEW
+-- NEW way of importing my own modules
 dofile(reaper.GetResourcePath() .. "/Scripts/rewgs-reaper-scripts/modules/init.lua")
 
 
 local project_name_delimiter = " - "
-local project_name = reaper.GetProjectName(0)
-local project_path = get_current_project_path() -- full path, including .rpp project name
-local project_dir = get_current_project_path():gsub(project_name, "") -- full path, minus .rpp project name
+-- local project_name = reaper.GetProjectName(0)
+-- local project_path = get_current_project_path() -- full path, including .rpp project name
+-- local project_dir = get_current_project_path():gsub(project_name, "") -- full path, minus .rpp project name
 local file_naming_convention = "$project - $starttc"
 
 

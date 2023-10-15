@@ -15,10 +15,11 @@ end
 
 local info = debug.getinfo(1, 'S')
 local this_file_name = get_file_name(info.source)
+-- TODO: see if the line below can replace the above line (and its associated function)
+-- local this_file_name = info.source:match("[^/]*.lua$")
 local this_file_path = rewgs_modules .. "/" .. this_file_name
 
 -- reaper.ShowConsoleMsg(info.source)
--- reaper.ShowConsoleMsg(this_file_name)
 -- reaper.ShowConsoleMsg(this_file_path)
 
 -- Returns all subdirectories and files within a given path.

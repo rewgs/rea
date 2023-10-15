@@ -12,6 +12,7 @@ IM:  F3
 
 
 # todo:
+- make TR delete REC if REC is present (as TR implies REC)
 - split "REC" into:
     - to record ensemble = "R-E"
     - to record soloist = "R-S"

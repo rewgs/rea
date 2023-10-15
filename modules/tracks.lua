@@ -8,10 +8,10 @@ function get_all_tracks_as_objects()
     -- num_media_items
     -- is_selected
     -- unmuted_media_items {
-        -- { media_item, index }
+    -- { media_item, index }
     -- }
     -- muted_media_items {
-        -- { media_item, index }
+    -- { media_item, index }
     -- }
 
     local all_tracks = {}
@@ -65,7 +65,6 @@ function get_all_tracks_as_objects()
 
     return all_tracks
 end
-
 
 function get_parent_track_name(parent_track)
     for i = 0, reaper.CountTracks(0) - 1 do
@@ -190,7 +189,6 @@ function create_named_audio_click_track()
     end
 end
 
-
 function get_skinny_stems(all_tracks)
     local skinny_stems = {}
     skinny_stems.which = "skinny"
@@ -289,7 +287,6 @@ function get_wide_stems(all_tracks)
     return wide_stems
 end
 
-
 function get_tracks_to_print()
     local tracks_to_print = {}
 
@@ -343,7 +340,6 @@ function search_up_family_tree(track, table)
     end
 end
 
-
 function is_child(track)
     if reaper.GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
         return false
@@ -351,7 +347,6 @@ function is_child(track)
         return true
     end
 end
-
 
 function is_marked(subject, pattern)
     local start_index, end_index = string.find(subject, pattern)
@@ -361,7 +356,6 @@ function is_marked(subject, pattern)
         return false
     end
 end
-
 
 function toggle_mark_track(mark)
     for _, track in ipairs(get_all_tracks_as_objects()) do
@@ -375,4 +369,38 @@ function toggle_mark_track(mark)
             end
         end
     end
+end
+
+function get_marked_tracks(total_num_tracks, mark)
+    local marked_tracks = {}
+
+    for i = 0, total_num_tracks - 1 do
+        local track = reaper.GetTrack(0, i)
+        local _, track_name = reaper.GetTrackName(track)
+
+        if is_marked(track_name, mark) then
+            -- reaper.ShowConsoleMsg(track_name .. "\n")
+            table.insert(marked_tracks, track_name)
+        end
+    end
+
+    return marked_tracks
+end
+
+
+function export_marked_tracks(marked_tracks, total_num_tracks)
+    for i = 0, total_num_tracks - 1 do
+        local track = reaper.GetTrack(0, i)
+        local _, track_name = reaper.GetTrackName(track)
+        -- reaper.ShowConsoleMsg("Current track: " .. track_name .. "\n")
+
+        for j, marked_track in ipairs(marked_tracks) do
+            if track_name == marked_track then
+                reaper.SetTrackSelected(track, true)
+            end
+        end
+    end
+
+    -- File: Export project MIDI...
+    reaper.Main_OnCommand(40849, 0)
 end

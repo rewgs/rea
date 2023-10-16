@@ -1,10 +1,14 @@
+-- dofile(reaper.GetResourcePath() .. "Scripts/rewgs-reaper-scripts/scripts/export-audio/modules/render-tables.lua")
+dofile(reaper.GetResourcePath() .. "/Scripts/rewgs-reaper-scripts/modules/names.lua")
+
+
 function print_render_table(rt)
     for key, value in pairs(rt) do
         reaper.ShowConsoleMsg(key .. ": " .. tostring(value) .. "\n")
     end
 end
 
-function render(rt, dst_dir, file_naming_convention)
+function render(rt, dst_dir, naming_convention)
     local render_table = ultraschall.CreateNewRenderTable(
         rt.source, rt.bounds, rt.start_pos, rt.end_pos, rt.tail_flag, rt.tail_ms, dst_dir,
         rt.file_name, rt.sample_rate, rt.channels, rt.render_type, rt.project_sample_rate_fx_processing,
@@ -32,14 +36,14 @@ function render(rt, dst_dir, file_naming_convention)
 end
 
 
-function render_mix(rt, dir, file_naming_convention)
+function render_mix(rt, dir, naming_convention)
     local dst_dir = dir .. "mixes"
-    render(rt, dst_dir, file_naming_convention)
+    render(rt, dst_dir, naming_convention)
 end
 
 
 -- NOTE: these are printed wet. Also need a dry option.
-function render_stems(stems_table, rt, dir, file_naming_convention)
+function render_stems(stems_table, rt, dir, naming_convention)
     -- reaper.ShowConsoleMsg("Running render_stems()")
     local dst_dir = dir .. "stems - " .. stems_table.which
     -- reaper.ShowConsoleMsg(dst_dir)
@@ -48,11 +52,32 @@ function render_stems(stems_table, rt, dir, file_naming_convention)
         reaper.SetTrackSelected(stem.media_track, true)
     end
 
-    render(rt, dst_dir, file_naming_convention)
+    render(rt, dst_dir, naming_convention)
 end
 
 
-function render_regions(regions_table, rt, dir, file_naming_convention)
+function render_regions(regions_table, rt, dir, naming_convention)
     local dst_dir = dir .. "all regions"
-    -- render(rt, dst_dir, file_naming_convention)
+    -- render(rt, dst_dir, naming_convention)
 end
+
+
+function render_assets(exports_folder)
+    local dst_dir = "./exports/" .. exports_folder .. "/renders/"
+
+    local renders = {
+        -- render_mix(rt_master_mp3, dst_dir, naming_convention),
+        -- render_mix(rt_master_wav, dst_dir, naming_convention),
+        render_stems(get_skinny_stems(get_all_tracks_as_objects()), rt_stems, dst_dir, naming_convention),
+        -- render_stems(get_wide_stems(all_tracks), rt_stems, dst_dir, naming_convention),
+        -- render_regions(get_unmuted_regions(all_tracks), rt_regions, dst_dir, naming_convention),
+        -- render(video, dst_dir, naming_convention)
+    }
+
+    -- `job` represents the current element of the table being looped over;
+    -- lua allows you to call it by adding `()` if the element is a function
+    for i, job in ipairs(renders) do
+        job()
+    end
+end
+

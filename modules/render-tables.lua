@@ -1,5 +1,3 @@
-dofile(reaper.GetResourcePath() .. "/Scripts/rewgs-reaper-scripts/modules/init.lua")
-
 rt_master_wav = {
     render_table_name = "master_wav",
 
@@ -331,3 +329,12 @@ rt_regions = {
 -- TODO; see notes in orch mark.lua
 -- mix minus = {
 -- }
+
+render_tables = {
+    master_wav = rt_master_wav,
+    master_mp3 = rt_master_mp3,
+    stems = rt_stems,
+    video = rt_video
+}
+
+return render_tables

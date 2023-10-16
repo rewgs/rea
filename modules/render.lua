@@ -17,7 +17,8 @@ function render(rt, dst_dir, naming_convention)
         rt.render_queue_delay_seconds, rt.close_after_render
     )
 
-    set_bounds_to_items {}
+    -- This is conflicting with Jon's workflow; perhaps ask for user input?
+    -- set_bounds_to_items {}
 
     -- This changes the current render settings, but doesn't kick off the render process
     retval, dirty = ultraschall.ApplyRenderTable_Project(render_table)

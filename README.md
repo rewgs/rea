@@ -5,7 +5,7 @@ Note:
 
 # Installation: 
 - Install the Ultraschall API -- it's a required dependency.
-- Download this repo and place it in your `REAPER/Scripts` folder. The full path should be `REAPER/Scripts/rewgs`.
+- Download this repo and place it in your `REAPER/Scripts` folder. The full path should be `REAPER/Scripts/rewgs-reaper-scripts`.
 
 # Suggested key bindings:
 - scripts/mark-tracks/rewgs - toggle mark track to record.lua: `F1`

@@ -1,4 +1,3 @@
--- dofile(reaper.GetResourcePath() .. "/UserPlugins/ultraschall_api.lua")
 dofile(reaper.GetResourcePath() .. "/Scripts/rewgs-reaper-scripts/modules/init.lua")
 
 function main()
@@ -14,5 +13,6 @@ function main()
 
     reaper.Undo_EndBlock(action_name, -1)
 end
+
 main()
 -- reaper.Main_OnCommand(40004, 0) -- closes Reaper

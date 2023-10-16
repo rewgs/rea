@@ -68,7 +68,7 @@ function render_assets(exports_folder)
     local renders = {
         -- render_mix(rt_master_mp3, dst_dir, naming_convention),
         -- render_mix(rt_master_wav, dst_dir, naming_convention),
-        render_stems(get_skinny_stems(get_all_tracks_as_objects()), rt_stems, dst_dir, naming_convention),
+        render_stems(get_skinny_stems(get_all_tracks_as_objects()), rt_stems, dst_dir, names.convention),
         -- render_stems(get_wide_stems(all_tracks), rt_stems, dst_dir, naming_convention),
         -- render_regions(get_unmuted_regions(all_tracks), rt_regions, dst_dir, naming_convention),
         -- render(video, dst_dir, naming_convention)

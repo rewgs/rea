@@ -1,7 +1,7 @@
 A collection of hopefully useful Reaper scripts.
 
-Files in `reaper-scripts` are meant to be called by the user.
-Files in `modules` are shared functions and whatnot, utilized by the files in `reaper-scripts`, and are not intended to be touched by the user.
+Files in `scripts` are meant to be called by the user.
+Files in `modules` are referenced by the files in `scripts`, and thus are not intended to be touched by the user.
 
 Installation: 
 - Install the Ultraschall API -- it's a required dependency.

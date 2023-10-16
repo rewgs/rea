@@ -1,3 +1,5 @@
+dofile(reaper.GetResourcePath() .. "/Scripts/rewgs-reaper-scripts/modules/track-marks.lua")
+
 function get_all_tracks_as_objects()
     -- returns all tracks in project as an object with the following properties:
     -- media_track
@@ -33,15 +35,18 @@ function get_all_tracks_as_objects()
         local muted_media_items = {}
         for m = 0, num_media_items - 1 do
             local media_item = reaper.GetMediaItem(0, m)
+            -- NOTE: This genuienly does not work, nor does `"B_MUTE"`. This is literally broken in the API.
             local mute_state = reaper.GetMediaItemInfo_Value(media_item, "B_MUTE_ACTUAL")
+            -- reaper.ShowConsoleMsg(track_name .. " media item #" .. tostring(m) .. " has a mute state of " .. mute_state .. "\n")
 
-            local unmuted_media_item_obj = {}
-            local muted_media_item_obj = {}
+            -- NOTE: Due to the above bug regarding mute_state, all media items are being added to unmuted_media_items
             if mute_state == false then
+                local unmuted_media_item_obj = {}
                 unmuted_media_item_obj.media_item = media_item
                 unmuted_media_item_obj.index = m
                 table.insert(unmuted_media_items, unmuted_media_item_obj)
             else
+                local muted_media_item_obj = {}
                 muted_media_item_obj.media_item = media_item
                 muted_media_item_obj.index = m
                 table.insert(muted_media_items, muted_media_item_obj)
@@ -371,38 +376,53 @@ function toggle_mark_track(mark)
     end
 end
 
-function get_marked_tracks(mark)
-    local marked_tracks = {}
-    -- for i = 0, total_num_tracks - 1 do
-    --     local track = reaper.GetTrack(0, i)
-    --     local _, track_name = reaper.GetTrackName(track)
-    --     if is_marked(track_name, mark) then
-    --         table.insert(marked_tracks, track_name)
-    --     end
-    -- end
-
+function get_all_marked_tracks()
+    local all_marked_tracks = {}
     for _, track in ipairs(get_all_tracks_as_objects()) do
-        if is_marked(track.name, mark) then
-            table.insert(marked_tracks, track)
+        for key, value in pairs(track_marks) do
+            if is_marked(track.name, value) then
+                table.insert(all_marked_tracks, track)
+            end
+        end
+    end
+
+    return all_marked_tracks
+end
+
+-- FIXME
+function get_marked_tracks(...)
+    local marked_tracks = {}
+    for _, track in ipairs(get_all_tracks_as_objects()) do
+        for _, mark in ipairs(arg) do
+            if is_marked(track.name, mark) then
+                reaper.ShowConsoleMsg(track.name)
+                table.insert(marked_tracks, track)
+            end
         end
     end
 
     return marked_tracks
 end
 
-
-function export_marked_tracks(marked_tracks, total_num_tracks)
-    for i = 0, total_num_tracks - 1 do
-        local track = reaper.GetTrack(0, i)
-        local _, track_name = reaper.GetTrackName(track)
-        -- reaper.ShowConsoleMsg("Current track: " .. track_name .. "\n")
-
-        for j, marked_track in ipairs(marked_tracks) do
-            if track_name == marked_track then
-                reaper.SetTrackSelected(track, true)
+function export_marked_tracks(marked_tracks)
+    for _, track in ipairs(get_all_tracks_as_objects()) do
+        for _, marked_track in ipairs(marked_tracks) do
+            if track.name == marked_track.name then
+                reaper.SetTrackSelected(track.media_track, true)
             end
         end
     end
+
+    -- OLD
+    -- for i = 0, total_num_tracks - 1 do
+    --     local track = reaper.GetTrack(0, i)
+    --     local _, track_name = reaper.GetTrackName(track)
+    --     for j, marked_track in ipairs(marked_tracks) do
+    --         if track_name == marked_track then
+    --             reaper.SetTrackSelected(track, true)
+    --         end
+    --     end
+    -- end
 
     -- File: Export project MIDI...
     reaper.Main_OnCommand(40849, 0)

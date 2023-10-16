@@ -1,4 +1,4 @@
-local function is_list_like(tbl)
+function is_list_like(tbl)
     local i = 0
     for _ in pairs(tbl) do
         i = i + 1
@@ -7,8 +7,7 @@ local function is_list_like(tbl)
     return true
 end
 
-
-local function recursively_search(search_term, input)
+function recursively_search(search_term, input)
     -- Searches for `search_term`, which is presumably an element of an list-like table, or a value of a dict-like table.
     -- Returns two values, depending on one of these outcomes:
     --  1. If `search_term` is a bad type (i.e. a table):
@@ -18,12 +17,12 @@ local function recursively_search(search_term, input)
     --      a. return val 1 is a bool for whether `search_term` exists in `input`
     --      b. if return val 1 is true, return val 2 is the index of `search_term`; if return val 1 is false, return val 2 is nil
 
-    assert (search_term ~= nil, "arg1 should not be nil!")
-    assert (type(search_term) ~= "table", search_term .. " should not be a table!")
+    assert(search_term ~= nil, "arg1 should not be nil!")
+    assert(type(search_term) ~= "table", search_term .. " should not be a table!")
 
     if type(input) == "table" then
         print("input is a table")
-        if not is_list_like(input) then     -- dict-like table
+        if not is_list_like(input) then -- dict-like table
             print("input is a dict-like table")
             local index = {}
             for k, v in pairs(table) do
@@ -37,7 +36,7 @@ local function recursively_search(search_term, input)
                 end
             end
             return false, nil
-        elseif is_list_like(input) then     -- list-like table
+        elseif is_list_like(input) then -- list-like table
             print("input is an list-like table")
             for i, t in ipairs(table) do
                 if type(t) ~= "table" then
@@ -57,8 +56,7 @@ local function recursively_search(search_term, input)
     end
 end
 
-
-local function get_length_of_dict_like_table(t)
+function get_length_of_dict_like_table(t)
     local count = 0
     for _ in pairs(t) do
         count = count + 1
@@ -66,24 +64,26 @@ local function get_length_of_dict_like_table(t)
     return count
 end
 
-
-local function print_names_of_track_table(t)
+function print_names_of_track_table(t)
     for i, track in ipairs(t) do
         reaper.ShowConsoleMsg(track.number .. ": " .. track.name .. "\n")
     end
 end
 
-
-local function print_values_of_table_keys(t)
+function print_values_of_table_keys(t)
     for key, value in pairs(t) do
         reaper.ShowConsoleMsg(key .. ": " .. tostring(value) .. "\n")
     end
 end
 
-
-return {
-    recursively_search = recursively_search,
-    get_length_of_dict_like_table = get_length_of_dict_like_table,
-    print_names_of_track_table = print_names_of_track_table,
-    print_values_of_table_keys = print_values_of_table_keys
-}
+function remove_duplicates_from_table(t)
+    local hash = {}
+    local res = {}
+    for _, v in ipairs(t) do
+        if (not hash[v]) then
+            res[#res + 1] = v
+            hash[v] = true
+        end
+    end
+    return res
+end

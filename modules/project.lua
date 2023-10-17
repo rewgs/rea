@@ -21,20 +21,20 @@ end
 
 -- TODO: FINISH ME
 -- function confirm_project_name_parsing(parsed_project_name)
-    -- Get values from the user.
-    --
-    -- If a caption begins with *, for example "*password", the edit field will not display the input text.
-    -- Maximum fields is 16. Values are returned as a comma-separated string. Returns false if the
-    -- user canceled the dialog. You can supply special extra information via additional caption
-    -- fields: extrawidth=XXX to increase text field width, separator=X to use a different separator
-    -- for returned fields.
-    --
-    -- Lua: boolean retval, string retvals_csv = reaper.GetUserInputs(string title, integer num_inputs, string captions_csv, string retvals_csv)
+-- Get values from the user.
+--
+-- If a caption begins with *, for example "*password", the edit field will not display the input text.
+-- Maximum fields is 16. Values are returned as a comma-separated string. Returns false if the
+-- user canceled the dialog. You can supply special extra information via additional caption
+-- fields: extrawidth=XXX to increase text field width, separator=X to use a different separator
+-- for returned fields.
+--
+-- Lua: boolean retval, string retvals_csv = reaper.GetUserInputs(string title, integer num_inputs, string captions_csv, string retvals_csv)
 
-    -- local user_input, retvals_csv = reaper.GetUserInputs(
-        -- string "Please confirm project name parsing before continuing.",
-        -- num_inputs, captions_csv, retvals_csv
-    -- )
+-- local user_input, retvals_csv = reaper.GetUserInputs(
+-- string "Please confirm project name parsing before continuing.",
+-- num_inputs, captions_csv, retvals_csv
+-- )
 -- end
 
 function remove_rpp_from_string(s)
@@ -50,6 +50,17 @@ function remove_rpp_from_string(s)
 end
 
 function parse_project_name()
+    -- Returns a table with the following key/value pairs:
+    -- project_code
+    -- cue_number
+    -- cue_name
+    -- cue_version
+    -- misc_text
+    -- exports_folder_name (all of the above, separated by `names.delimiter`)
+
+    -- prints function name
+    -- reaper.ShowConsoleMsg("Running function: " .. debug.getinfo(1, "n").name .. "()\n\n")
+
     local parts = {}
     local parsed_project_name = {}
 
@@ -83,9 +94,9 @@ function parse_project_name()
         previous_part = part
     end
     parsed_project_name.exports_folder_name = parsed_project_name.project_code .. names.delimiter ..
-                                           parsed_project_name.cue_number .. names.delimiter ..
-                                           parsed_project_name.cue_name .. names.delimiter ..
-                                           parsed_project_name.cue_version
+        parsed_project_name.cue_number .. names.delimiter ..
+        parsed_project_name.cue_name .. names.delimiter ..
+        parsed_project_name.cue_version
 
     -- debug
     -- for key, value in pairs(parsed_project_name) do

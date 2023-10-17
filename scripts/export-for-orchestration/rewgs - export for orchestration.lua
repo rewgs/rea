@@ -19,6 +19,10 @@ local function main()
     -- Remove duplicates from `tracks_to_orchestrate`, if any
     local tracks = remove_duplicates_from_table(tracks_to_orchestrate)
 
+    -- TODO
+    -- deactivate humanization MIDI plugins
+    -- Item: apply track/take fx to items (midi output) 
+
     -- Check for empty or muted MIDI regions; delete
     -- for _, track in ipairs(tracks) do
     --     -- reaper.ShowConsoleMsg(track.name)
@@ -32,6 +36,9 @@ local function main()
 
     set_bounds_to_items {}
     export_marked_tracks(tracks_to_orchestrate)
+
+    -- TODO
+    -- change the name of the new .rpp -- replace `_1` with ` - to orch` (perhaps replace misc text?)
 
     reaper.Undo_EndBlock(action_name, -1)
 end

@@ -5,13 +5,13 @@ function main()
     reaper.ClearConsole()
     local action_name = 'rewgs - export skinny stems'
 
-    local exports_path = "./exports/" .. parse_project_name().exports_folder_name .. "/renders/"
-
-    local stems = get_skinny_stems(get_all_tracks_as_objects())
-    local dst_dir = exports_path .. "stems - " .. stems.which
+    local parsed_project_name = parse_project_name()
+    local exports_folder = parsed_project_name.exports_folder_name
+    local dst_dir = "./exports/" .. exports_folder .. "/renders/" .. "mixes"
 
     -- TODO: make sure the `misc_text` property of `parsed_project_name` isn't in the name of the resulting assets
-    local success = render_stems(stems, rt_stems, dst_dir, names.convention)
+    -- render_assets(exports_folder)
+    local success = render_mix(rt_master_wav, dst_dir, names.convention)
 
     reaper.Undo_EndBlock(action_name, -1)
 

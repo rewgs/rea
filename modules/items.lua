@@ -83,8 +83,9 @@ function set_bounds_to_items(args)
     -- continue
     ----------------------------------------------------------------------------
 
-    -- 'Time selection: Set time selection to items'
-    reaper.Main_OnCommand(40290, 0)
+    -- TODO: give user input for this/make into arg. Jon needs this to not be enabled for now in 
+    -- order for export-audio functions to work, so commenting this out is the short-term solution.
+    -- reaper.Main_OnCommand(40290, 0) -- 'Time selection: Set time selection to items'
 
     -- FIXME: maybe change this to "show only selected tracks?" or "show only tracks with selected items?"
     -- 'Script: Track Visibility - Show only tracks with items.lua'

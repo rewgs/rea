@@ -83,6 +83,7 @@ end
 
 -- Probably an unnecessary function. Really only useful for calling multiple render jobs in one go, 
 -- but I think this is ultimately an unnecessary level of abstraction.
+-- THOUGH, maybe re-use this by reading jobs/what files are copied to each recipient's directory?
 -- function render_assets(exports_folder)
 --     local dst_dir = "./exports/" .. exports_folder .. "/renders/"
 --     local renders = {

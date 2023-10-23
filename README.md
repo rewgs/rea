@@ -14,4 +14,9 @@ Note:
 - scripts/mark-tracks/rewgs - toggle mark track to transcribe.lua: `F2`
 - scripts/mark-tracks/rewgs - toggle mark track to improve.lua: `F3`
 - scripts/export-for-orchestration/rewgs - export for orchestraion.lua: `F4`
-- scripts/export-audio/rewgs - export stems (skinny).lua: `F5`
+- scripts/export-audio/rewgs - export mix wav.lua: `F5`
+- scripts/export-audio/rewgs - export mix mp3.lua: `F6`
+- scripts/export-audio/rewgs - export stems skinny wet.lua: `F7`
+- scripts/export-audio/rewgs - export stems skinny dry.lua: `Shift+F7`
+- scripts/export-audio/rewgs - export stems wide wet.lua: `F8`
+- scripts/export-audio/rewgs - export stems wide dry.lua: `Shift+F8`

@@ -9,6 +9,7 @@ function get_all_tracks_as_objects()
     -- parent
     -- num_media_items
     -- is_selected
+    -- track_mute_state
     -- unmuted_media_items {
     -- { media_item, index }
     -- }
@@ -30,6 +31,7 @@ function get_all_tracks_as_objects()
         local parent = reaper.GetMediaTrackInfo_Value(media_track, "P_PARTRACK")
         local num_media_items = reaper.CountTrackMediaItems(media_track)
         local is_selected = reaper.IsTrackSelected(media_track)
+        local track_mute_state = reaper.GetMediaTrackInfo_Value(media_track, "B_MUTE")
 
         local unmuted_media_items = {}
         local muted_media_items = {}
@@ -60,6 +62,7 @@ function get_all_tracks_as_objects()
             depth = depth,
             parent = parent,
             is_selected = is_selected,
+            track_mute_state = track_mute_state,
             num_media_items = num_media_items,
             unmuted_media_items = unmuted_media_items,
             muted_media_items = muted_media_items
@@ -426,4 +429,23 @@ function export_marked_tracks(marked_tracks)
 
     -- File: Export project MIDI...
     reaper.Main_OnCommand(40849, 0)
+end
+
+-- FIXME: This function is acting a little weird, not always firing. Just adapting the meat of this 
+-- function and straight-forwardly calling the SetMediaTrackInfo_Value() function whenever needed.
+function toggle_effects_track_mute_state()
+    for _, track in ipairs(get_all_tracks_as_objects()) do
+        if track.name == "Effects" and track.depth == 1 then
+            local muted = nil
+            if track.track_mute_state == 0 then
+                muted = reaper.SetMediaTrackInfo_Value(track.media_track, "B_MUTE", 1)
+            else
+                muted = reaper.SetMediaTrackInfo_Value(track.media_track, "B_MUTE", 0)
+            end
+            return muted
+        -- else
+            -- TODO: better error handling.
+            -- reaper.ShowConsoleMsg("Could not find a track called Effects. Please try again.")
+        end
+    end
 end

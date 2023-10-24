@@ -20,3 +20,5 @@ Note:
 - scripts/export-audio/rewgs - export stems skinny dry.lua: `Shift+F7`
 - scripts/export-audio/rewgs - export stems wide wet.lua: `F8`
 - scripts/export-audio/rewgs - export stems wide dry.lua: `Shift+F8`
+- scripts/export-audio/rewgs - export tracks to transcribe wet.lua: `F9`
+- scripts/export-audio/rewgs - export tracks to transcribe dry.lua: `Shift+F9`

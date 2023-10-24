@@ -3,9 +3,9 @@ dofile(reaper.GetResourcePath() .. "/Scripts/rewgs-reaper-scripts/modules/init.l
 function main()
     reaper.Undo_BeginBlock()
     reaper.ClearConsole()
-    local action_name = 'rewgs - export tracks to transcribe wet'
+    local action_name = 'rewgs - export tracks to transcribe dry'
     local exports_path = "./exports/" .. parse_project_name().exports_folder_name .. "/renders/"
-    local dst_dir = exports_path .. "to transcribe - wet"
+    local dst_dir = exports_path .. "to transcribe - dry"
 
     -- gets all tracks marked "to transcribe"
     local tracks_to_transcribe = {}

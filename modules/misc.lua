@@ -31,3 +31,8 @@ function print_function_name()
         reaper.ShowConsoleMsg("Running function: " .. function_name .. "()\n\n")
     end
 end
+
+function strip_whitespace_from_ends(str)
+    local stripped_str = str:gsub("^%s*(.-)%s*$", "%1")
+    return stripped_str
+end

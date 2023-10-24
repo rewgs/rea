@@ -73,7 +73,9 @@ function parse_project_name()
     for i, part in ipairs(parts) do
         if previous_part ~= sep then
             -- Removes whitespace from left and right of string
-            local stripped_part = part:gsub("^%s*(.-)%s*$", "%1")
+            -- Moved this function into `misc.lua` module
+            -- local stripped_part = part:gsub("^%s*(.-)%s*$", "%1")
+            local stripped_part = strip_whitespace_from_ends(part)
             if i == 1 then
                 parsed_project_name.project_code = stripped_part
             elseif i == 2 then

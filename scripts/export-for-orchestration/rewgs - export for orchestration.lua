@@ -11,7 +11,10 @@ local function main()
     -- Get all tracks marked for orchestration
     local tracks_to_orchestrate = {}
     for _, track in ipairs(get_all_marked_tracks()) do
-        if is_marked(track.name, track_marks.record) or is_marked(track.name, track_marks.transcribe) then
+        -- Don't need to export MIDI for tracks marked to transcribe, as those are audio tracks.
+        -- Leave this here for breadcrumbs in case anything breaks.
+        -- if is_marked(track.name, track_marks.record) or is_marked(track.name, track_marks.transcribe) then
+        if is_marked(track.name, track_marks.record) then
             table.insert(tracks_to_orchestrate, track)
         end
     end
@@ -21,7 +24,7 @@ local function main()
 
     -- TODO
     -- deactivate humanization MIDI plugins
-    -- Item: apply track/take fx to items (midi output) 
+    -- Item: apply track/take fx to items (midi output)
 
     -- Check for empty or muted MIDI regions; delete
     -- for _, track in ipairs(tracks) do

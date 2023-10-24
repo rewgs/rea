@@ -1,4 +1,5 @@
 -- dofile(reaper.GetResourcePath() .. "Scripts/rewgs-reaper-scripts/scripts/export-audio/modules/render-tables.lua")
+dofile(reaper.GetResourcePath() .. "/Scripts/rewgs-reaper-scripts/modules/misc.lua")
 dofile(reaper.GetResourcePath() .. "/Scripts/rewgs-reaper-scripts/modules/names.lua")
 
 
@@ -8,16 +9,18 @@ function print_render_table(rt)
     end
 end
 
--- TODO: add error handling
+-- TODO: add error handling.
+-- TODO: strip leading and trailing whitespace from track names. Maybe don't do it in this function, 
+-- but also maybe do it here? Wrote a function for this in `misc.lua` but it's not working with 
+-- track names, even though it's working in the test file (in `.tests/`)...why?
 -- https://www.lua.org/pil/8.4.html
 function render(rt, dst_dir, naming_convention)
-    -- reaper.ShowConsoleMsg("Running render()")
     local render_table = ultraschall.CreateNewRenderTable(
         rt.source, rt.bounds, rt.start_pos, rt.end_pos, rt.tail_flag, rt.tail_ms, dst_dir,
-        rt.file_name, rt.sample_rate, rt.channels, rt.render_type, rt.project_sample_rate_fx_processing,
-        rt.render_resample, rt.keep_mono, rt.keep_multichannel, rt.dither, rt.render_string,
-        rt.silently_increment_filename, rt.add_to_proj, rt.save_copy_of_project, rt.render_queue_delay,
-        rt.render_queue_delay_seconds, rt.close_after_render
+        rt.file_name, rt.sample_rate, rt.channels, rt.render_type,
+        rt.project_sample_rate_fx_processing, rt.render_resample, rt.keep_mono, rt.keep_multichannel,
+        rt.dither, rt.render_string, rt.silently_increment_filename, rt.add_to_proj,
+        rt.save_copy_of_project, rt.render_queue_delay, rt.render_queue_delay_seconds, rt.close_after_render
     )
 
     -- This is conflicting with Jon's workflow; perhaps ask for user input?
@@ -33,14 +36,15 @@ function render(rt, dst_dir, naming_convention)
     -- optional boolean AddToProj: true, add the rendered files to the project; nil or false, don't add them; will overwrite the settings in the RenderTable; will default to true, if no RenderTable is passed only has an effect, when rendering the current active project
     -- optional boolean CloseAfterRender: true or nil, closes rendering to file-dialog after rendering is finished; false, keep it open; will overwrite the settings in the RenderTable; will default to true, if no RenderTable is passed
     -- optional boolean SilentlyIncrementFilename; true or nil, silently increment filename, when file already exists; false, ask for overwriting; will overwrite the settings in the RenderTable; will default to true, if no RenderTable is passed
-    count, media_item_state_chunk_array, file_array = ultraschall.RenderProject_RenderTable(nil, render_table, false, true, false)
+    count, media_item_state_chunk_array, file_array = ultraschall.RenderProject_RenderTable(
+        nil, render_table, false, true, false
+    )
 
     -- Track: Unselect (clear selection of) all tracks
     reaper.Main_OnCommand(40297, 0)
 
     return true
 end
-
 
 function render_mix(rt, dir, naming_convention)
     -- local dst_dir = dir .. "mixes"
@@ -54,7 +58,6 @@ function render_mix(rt, dir, naming_convention)
         return true
     end
 end
-
 
 -- NOTE: these are printed wet. Also need a dry option.
 function render_stems(stems_table, rt, dir, naming_convention)
@@ -74,14 +77,12 @@ function render_stems(stems_table, rt, dir, naming_convention)
     end
 end
 
-
 function render_regions(regions_table, rt, dir, naming_convention)
     local dst_dir = dir .. "all regions"
     render(rt, dst_dir, naming_convention)
 end
 
-
--- Probably an unnecessary function. Really only useful for calling multiple render jobs in one go, 
+-- Probably an unnecessary function. Really only useful for calling multiple render jobs in one go,
 -- but I think this is ultimately an unnecessary level of abstraction.
 -- THOUGH, maybe re-use this by reading jobs/what files are copied to each recipient's directory?
 -- function render_assets(exports_folder)

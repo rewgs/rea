@@ -198,6 +198,14 @@ function create_named_audio_click_track()
 end
 
 function get_skinny_stems(all_tracks)
+    -- Returns a table containing all folder tracks one level below "Music Sub Mix," except for 
+    --  Orchestra and Effects.
+    --
+    -- Includes folder tracks whose children are only muted tracks, or the track of which only 
+    --  contain muted media items or don't contain any media items, i.e. stems that would print 
+    --  silence.
+    -- To get *only* the stems that would print silence, run `get_silent_skinny_stems()` instead.
+
     local skinny_stems = {}
     skinny_stems.which = "skinny"
 
@@ -219,6 +227,75 @@ function get_skinny_stems(all_tracks)
     end
 
     return skinny_stems
+end
+
+function get_wide_stems(all_tracks)
+    -- Returns a table containing the lowest-depth folder tracks below those specified in 
+    --  `get_skinny_stems()`.
+    --
+    -- Includes folder tracks whose children are only muted tracks, or the track of which only 
+    --  contain muted media items or don't contain any media items, i.e. stems that would print 
+    --  silence.
+    -- To get *only* the stems that would print silence, run `get_wide_skinny_stems()` instead.
+
+    local wide_stems = {}
+    wide_stems.which = "wide"
+
+    -- This will gather some tracks that don't belong in the final `wide_stems` table
+    local candidates = {}
+    for i, track in ipairs(all_tracks) do
+        if track.depth < 0 then
+            table.insert(candidates, track.parent)
+        end
+    end
+
+    for i, track in ipairs(all_tracks) do
+        for j, candidate in ipairs(candidates) do
+            if track.media_track == candidate then
+                table.insert(wide_stems, track)
+            end
+        end
+    end
+
+    -- This removes the tracks that don't belong
+    for i, stem in ipairs(wide_stems) do
+        if stem.name == "Movie" or stem.name == "Effects" then
+            table.remove(wide_stems, i)
+        end
+    end
+
+    -- for i, stem in ipairs(wide_stems) do
+    -- reaper.ShowConsoleMsg(stem.name .. "\n")
+    -- end
+
+    return wide_stems
+end
+
+-- function get_silent_skinny_stems(all_tracks)
+    -- Returns a table containing only the stems returned by `get_skinny_stems()` that will print 
+    --  silence.
+-- end
+
+-- function get_silent_wide_stems(all_tracks)
+-- end
+
+function get_children_of_skinny_stems(all_tracks)
+    local skinny_stems = get_skinny_stems(get_all_tracks_as_objects())
+
+    local children_of_skinny_stems = {}
+    for i, track in ipairs(all_tracks) do
+        if track.depth <= 0 then
+            for j, stem in ipairs(skinny_stems) do
+                if get_parent_track_name(track.parent) == stem.name then
+                    -- FIXME: why isn't this block running?
+                    reaper.ShowConsoleMsg("asdf")
+                    table.insert(children_of_skinny_stems, track)
+                end
+            end
+        end
+    end
+
+    -- return children_of_skinny_stems
 end
 
 function get_next_track_obj(current_track, all_tracks)
@@ -261,39 +338,6 @@ function get_child_folder_tracks_of(parent_folder_track, next_folder_track, all_
     -- end
 end
 
-function get_wide_stems(all_tracks)
-    local wide_stems = {}
-    wide_stems.which = "wide"
-
-    -- This will gather some tracks that don't belong in the final `wide_stems` table
-    local candidates = {}
-    for i, track in ipairs(all_tracks) do
-        if track.depth < 0 then
-            table.insert(candidates, track.parent)
-        end
-    end
-
-    for i, track in ipairs(all_tracks) do
-        for j, candidate in ipairs(candidates) do
-            if track.media_track == candidate then
-                table.insert(wide_stems, track)
-            end
-        end
-    end
-
-    -- This removes the tracks that don't belong
-    for i, stem in ipairs(wide_stems) do
-        if stem.name == "Movie" or stem.name == "Effects" then
-            table.remove(wide_stems, i)
-        end
-    end
-
-    -- for i, stem in ipairs(wide_stems) do
-    -- reaper.ShowConsoleMsg(stem.name .. "\n")
-    -- end
-
-    return wide_stems
-end
 
 function get_tracks_to_print()
     local tracks_to_print = {}

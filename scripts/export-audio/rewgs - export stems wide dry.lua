@@ -16,7 +16,7 @@ function main()
     end
 
     -- TODO: make sure the `misc_text` property of `parsed_project_name` isn't in the name of the resulting assets
-    local success = render_stems(stems, rt_stems, dst_dir, names.convention)
+    local success = render_stems(stems, rt_stems, dst_dir)
 
     reaper.Undo_EndBlock(action_name, -1)
 

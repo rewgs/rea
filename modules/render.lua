@@ -14,10 +14,12 @@ end
 -- but also maybe do it here? Wrote a function for this in `misc.lua` but it's not working with 
 -- track names, even though it's working in the test file (in `.tests/`)...why?
 -- https://www.lua.org/pil/8.4.html
-function render(rt, dst_dir, naming_convention)
+function render(rt, dst_dir, file_name_arg)
+    local file_name = file_name_arg or rt.file_name
+
     local render_table = ultraschall.CreateNewRenderTable(
         rt.source, rt.bounds, rt.start_pos, rt.end_pos, rt.tail_flag, rt.tail_ms, dst_dir,
-        rt.file_name, rt.sample_rate, rt.channels, rt.render_type,
+        file_name, rt.sample_rate, rt.channels, rt.render_type,
         rt.project_sample_rate_fx_processing, rt.render_resample, rt.keep_mono, rt.keep_multichannel,
         rt.dither, rt.render_string, rt.silently_increment_filename, rt.add_to_proj,
         rt.save_copy_of_project, rt.render_queue_delay, rt.render_queue_delay_seconds, rt.close_after_render
@@ -46,9 +48,21 @@ function render(rt, dst_dir, naming_convention)
     return true
 end
 
-function render_mix(rt, dir, naming_convention)
+function render_mix(rt, dir)
     -- local dst_dir = dir .. "mixes"
-    local success = render(rt, dir, naming_convention)
+    local success = render(rt, dir)
+
+    if success ~= true then
+        -- TODO: This is temporary. Handle this better.
+        reaper.ShowConsoleMsg("There was a problem printing.")
+        return false
+    else
+        return true
+    end
+end
+
+function render_mix_minus(rt, dir, file_name)
+    local success = render(rt, dir, file_name)
 
     if success ~= true then
         -- TODO: This is temporary. Handle this better.
@@ -60,13 +74,13 @@ function render_mix(rt, dir, naming_convention)
 end
 
 -- NOTE: these are printed wet. Also need a dry option.
-function render_stems(stems_table, rt, dir, naming_convention)
+function render_stems(stems_table, rt, dir)
     -- reaper.ShowConsoleMsg("Running render_stems()")
     for i, stem in ipairs(stems_table) do
         reaper.SetTrackSelected(stem.media_track, true)
     end
 
-    local success = render(rt, dir, naming_convention)
+    local success = render(rt, dir)
 
     if success ~= true then
         -- TODO: This is temporary. Handle this better.
@@ -77,9 +91,9 @@ function render_stems(stems_table, rt, dir, naming_convention)
     end
 end
 
-function render_regions(regions_table, rt, dir, naming_convention)
+function render_regions(regions_table, rt, dir)
     local dst_dir = dir .. "all regions"
-    render(rt, dst_dir, naming_convention)
+    render(rt, dst_dir)
 end
 
 -- Probably an unnecessary function. Really only useful for calling multiple render jobs in one go,

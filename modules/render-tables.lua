@@ -1,3 +1,6 @@
+dofile(reaper.GetResourcePath() .. "/Scripts/rewgs-reaper-scripts/modules/project.lua")
+local p = parse_project_name()
+
 rt_master_wav = {
     render_table_name = "master_wav",
 
@@ -18,7 +21,8 @@ rt_master_wav = {
     end_pos = 0,
     tail_flag = 1,
     tail_ms = 0,
-    file_name = names.convention .. " - mix",
+    -- file_name = names.convention .. " - mix",
+    file_name = p.project_code .. names.delimiter .. p.cue_number .. names.delimiter .. p.cue_name .. names.delimiter .. p.cue_version .. names.delimiter .. "$starttc" .. names.delimiter .. "mix",
     sample_rate = 48000,
     channels = 2,
 
@@ -72,7 +76,8 @@ rt_master_mp3 = {
     end_pos = 0,
     tail_flag = 1,
     tail_ms = 0,
-    file_name = names.convention .. " - mix",
+    -- file_name = names.convention .. " - mix",
+    file_name = p.project_code .. names.delimiter .. p.cue_number .. names.delimiter .. p.cue_name .. names.delimiter .. p.cue_version .. names.delimiter .. "$starttc" .. names.delimiter .. "mix",
     sample_rate = 48000,
     channels = 2,
 
@@ -117,7 +122,8 @@ rt_video = {
     end_pos = 0,
     tail_flag = 1,
     tail_ms = 0,
-    file_name = "$project",
+    -- file_name = "$project",
+    file_name = p.project_code .. names.delimiter .. p.cue_number .. names.delimiter .. p.cue_name .. names.delimiter .. p.cue_version,
     sample_rate = 48000,
     channels = 2,
 
@@ -212,7 +218,8 @@ rt_stems = {
     end_pos = 0,
     tail_flag = 1,
     tail_ms = 0,
-    file_name = names.convention .. " - $track",
+    -- file_name = names.convention .. " - $track",
+    file_name = p.project_code .. names.delimiter .. p.cue_number .. names.delimiter .. p.cue_name .. names.delimiter .. p.cue_version .. names.delimiter .. "$starttc" .. names.delimiter .. "$track",
     sample_rate = 48000,
     channels = 2,
 
@@ -276,7 +283,8 @@ rt_regions = {
     end_pos = 0,
     tail_flag = 1,
     tail_ms = 0,
-    file_name = names.convention .. " - $track" .. " - $item",
+    -- file_name = names.convention .. " - $track" .. " - $item",
+    file_name = p.project_code .. names.delimiter .. p.cue_number .. names.delimiter .. p.cue_name .. names.delimiter .. p.cue_version .. names.delimiter .. "$starttc" .. names.delimiter .. "$track" .. names.delimiter .. "$item",
     sample_rate = 48000,
     channels = 2,
 
@@ -326,13 +334,64 @@ rt_regions = {
     close_after_render = true,
 }
 
--- TODO; see notes in orch mark.lua
--- mix minus = {
--- }
+rt_mix_minus = {
+    render_table_name = "mix_minus",
+
+    -- 0, Master mix;
+    -- 1, Master mix + stems;
+    -- 3, Stems (selected tracks);
+    -- 8, Region render matrix;
+    -- 16, Tracks with only Mono-Media to Mono Files;
+    -- 32, Selected media items; 64, selected media items via master;
+    -- 128, selected tracks via master
+    -- 4096, Razor edit areas
+    -- 4224, Razor edit areas via master
+    source = 0,
+
+    -- 0, Custom time range; 1, Entire project(default); 2, Time selection; 3, Project regions; 4, Selected Media Items(in combination with Source 32); 5, Selected regions; 6, Razor edit areas; 7, All project markers; 8, Selected markers
+    bounds = 2,
+    start_pos = 0,
+    end_pos = 0,
+    tail_flag = 1,
+    tail_ms = 0,
+    -- file_name = names.convention .. " - mix",
+    file_name = p.project_code .. names.delimiter .. p.cue_number .. names.delimiter .. p.cue_name .. names.delimiter .. p.cue_version .. names.delimiter .. "$starttc" .. names.delimiter .. "mix",
+    sample_rate = 48000,
+    channels = 2,
+
+    -- 0, Full-speed Offline(default); 1, 1x Offline; 2, Online Render; 3, Online Render(Idle); 4, Offline Render(Idle)
+    render_type = 0,
+    project_sample_rate_fx_processing = true,
+
+    -- 0, Sinc Interpolation: 64pt (medium quality); 1, Linear Interpolation: (low quality); 2, Point Sampling (lowest quality, retro); 3, Sinc Interpolation: 192pt; 4, Sinc Interpolation: 384pt; 5, Linear Interpolation + IIR; 6, Linear Interpolation + IIRx2; 7, Sinc Interpolation: 16pt; 8, Sinc Interpolation: 512pt(slow); 9, Sinc Interpolation: 768pt(very slow); 10, r8brain free (highest quality, fast)
+    render_resample = 10,
+    keep_mono = true,
+    keep_multichannel = true,
+
+    -- 0 = none; &1, dither master mix; &2, noise shaping master mix; &4, dither stems; &8, dither noise shaping stems
+    dither = 0,
+
+    -- args:
+    -- (int) bit depth: 0, 8 Bit PCM; 1, 16 Bit PCM; 2, 24 Bit PCM; 3, 32 Bit FP; 4, 64 Bit FP; 5, 4 Bit IMA ADPCM; 6, 2 Bit cADPCM; 7, 32 Bit PCM; 8, 8 Bit u-Law
+    -- (int) large files: 0, Auto WAV/Wave64; 1, Auto Wav/RF64; 2, Force WAV; 3, Force Wave64; 4, Force RF64
+    -- (int) bwf_chunk (write 'bext' chunk and include project filename in BWF data - checkboxes): 0, unchecked - unchecked; 1, checked - unchecked; 2, unchecked - checked; 3, checked - checked
+    -- (int) the "include markers" dropdown list: 0, Do not include markers and regions; 1, Markers + regions; 2, Markers + regions starting with #; 3, Markers only; 4, Markers starting with # only; 5, Regions only; 6, Regions starting with # only
+    -- (bool) embed tempo-checkbox; true, checked; false, unchecked
+    render_string = ultraschall.CreateRenderCFG_WAV(24, 2, 1, 0, false),
+    silently_increment_filename = false,
+    add_to_proj = false,
+    save_copy_of_project = false,
+    render_queue_delay = false,
+    render_queue_delay_seconds = 0,
+
+    -- refers to closing the dialog, not the Reaper project
+    close_after_render = true,
+}
 
 render_tables = {
     master_wav = rt_master_wav,
     master_mp3 = rt_master_mp3,
+    mix_minus = rt_mix_minus,
     stems = rt_stems,
     video = rt_video
 }

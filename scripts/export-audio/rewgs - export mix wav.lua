@@ -11,7 +11,7 @@ function main()
 
     -- TODO: make sure the `misc_text` property of `parsed_project_name` isn't in the name of the resulting assets
     -- render_assets(exports_folder)
-    local success = render_mix(rt_master_wav, dst_dir, names.convention)
+    local success = render_mix(rt_master_wav, dst_dir)
 
     reaper.Undo_EndBlock(action_name, -1)
 

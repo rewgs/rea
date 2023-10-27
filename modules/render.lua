@@ -10,12 +10,21 @@ function print_render_table(rt)
 end
 
 -- TODO: add error handling.
+--
 -- TODO: strip leading and trailing whitespace from track names. Maybe don't do it in this function, 
 -- but also maybe do it here? Wrote a function for this in `misc.lua` but it's not working with 
 -- track names, even though it's working in the test file (in `.tests/`)...why?
 -- https://www.lua.org/pil/8.4.html
-function render(rt, dst_dir, file_name_arg)
-    local file_name = file_name_arg or rt.file_name
+--
+-- NOTE: Changed this function to taking a single parameter table called `args`. Keeping the old 
+-- declaration with its parameters here for reference.
+--
+-- function render(rt, dst_dir, file_name_arg, keep_silent_arg)
+function render(args)
+    local rt = args.rt
+    local dst_dir = args.dst_dir
+    local file_name = args.file_name or rt.file_name
+    local keep_silent = args.keep_silent or false
 
     local render_table = ultraschall.CreateNewRenderTable(
         rt.source, rt.bounds, rt.start_pos, rt.end_pos, rt.tail_flag, rt.tail_ms, dst_dir,
@@ -26,7 +35,15 @@ function render(rt, dst_dir, file_name_arg)
     )
 
     -- This is conflicting with Jon's workflow; perhaps ask for user input?
-    set_bounds_to_items {}
+    if keep_silent == true then
+        set_bounds_to_items {empty = true}
+    else
+        -- Like render(), set_bounds_to_items() takes a table called `args` for easier passing of named arguments.
+        -- Calling it with an empty `{}` denotes that all of the default parameter values will be used.
+        -- For more, see here: https://www.lua.org/pil/5.3.html 
+        -- (If the link above ends up invalid at any point, it's "Programming in Lua" Chapter 5.3: "Named Arguments")
+        set_bounds_to_items {}
+    end
 
     -- This changes the current render settings, but doesn't kick off the render process
     retval, dirty = ultraschall.ApplyRenderTable_Project(render_table)
@@ -50,7 +67,8 @@ end
 
 function render_mix(rt, dir)
     -- local dst_dir = dir .. "mixes"
-    local success = render(rt, dir)
+    -- local success = render(rt, dir)
+    local success = render{rt=rt, dst_dir=dir}
 
     if success ~= true then
         -- TODO: This is temporary. Handle this better.
@@ -62,7 +80,8 @@ function render_mix(rt, dir)
 end
 
 function render_mix_minus(rt, dir, file_name)
-    local success = render(rt, dir, file_name)
+    -- local success = render(rt, dir, file_name)
+    local success = render{rt=rt, dst_dir=dir, file_name=file_name}
 
     if success ~= true then
         -- TODO: This is temporary. Handle this better.
@@ -73,14 +92,36 @@ function render_mix_minus(rt, dir, file_name)
     end
 end
 
--- NOTE: these are printed wet. Also need a dry option.
 function render_stems(stems_table, rt, dir)
     -- reaper.ShowConsoleMsg("Running render_stems()")
     for i, stem in ipairs(stems_table) do
+        -- Note: this is ALL wide stems, including those that are muted/don't have items/etc
+        -- reaper.ShowConsoleMsg(stem.name .. "\n")
         reaper.SetTrackSelected(stem.media_track, true)
     end
 
-    local success = render(rt, dir)
+    -- local success = render(rt, dir)
+    local success = render{rt=rt, dst_dir=dir}
+
+    if success ~= true then
+        -- TODO: This is temporary. Handle this better.
+        reaper.ShowConsoleMsg("There was a problem printing.")
+        return false
+    else
+        return true
+    end
+end
+
+function render_stems_keep_silent(stems_table, rt, dir)
+    -- reaper.ShowConsoleMsg("Running render_stems()")
+    for i, stem in ipairs(stems_table) do
+        -- Note: this is ALL wide stems, including those that are muted/don't have items/etc
+        -- reaper.ShowConsoleMsg(stem.name .. "\n")
+        reaper.SetTrackSelected(stem.media_track, true)
+    end
+
+    -- function render(rt, dst_dir, file_name_arg, keep_silent_arg)
+    local success = render{rt=rt, dst_dir=dir, keep_silent_arg=true}
 
     if success ~= true then
         -- TODO: This is temporary. Handle this better.
@@ -93,7 +134,8 @@ end
 
 function render_regions(regions_table, rt, dir)
     local dst_dir = dir .. "all regions"
-    render(rt, dst_dir)
+    -- render(rt, dst_dir)
+    render{rt=rt, dst_dir=dst_dir}
 end
 
 -- Probably an unnecessary function. Really only useful for calling multiple render jobs in one go,

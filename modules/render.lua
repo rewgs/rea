@@ -21,10 +21,16 @@ end
 --
 -- function render(rt, dst_dir, file_name_arg, keep_silent_arg)
 function render(args)
+    -- args
     local rt = args.rt
     local dst_dir = args.dst_dir
     local file_name = args.file_name or rt.file_name
     local keep_silent = args.keep_silent or false
+
+    -- reaper.ShowConsoleMsg(tostring(rt) .. "\n")
+    -- reaper.ShowConsoleMsg(tostring(dst_dir) .. "\n")
+    -- reaper.ShowConsoleMsg(tostring(file_name) .. "\n")
+    -- reaper.ShowConsoleMsg(tostring(keep_silent) .. "\n")
 
     local render_table = ultraschall.CreateNewRenderTable(
         rt.source, rt.bounds, rt.start_pos, rt.end_pos, rt.tail_flag, rt.tail_ms, dst_dir,
@@ -34,16 +40,8 @@ function render(args)
         rt.save_copy_of_project, rt.render_queue_delay, rt.render_queue_delay_seconds, rt.close_after_render
     )
 
-    -- This is conflicting with Jon's workflow; perhaps ask for user input?
-    if keep_silent == true then
-        set_bounds_to_items {empty = true}
-    else
-        -- Like render(), set_bounds_to_items() takes a table called `args` for easier passing of named arguments.
-        -- Calling it with an empty `{}` denotes that all of the default parameter values will be used.
-        -- For more, see here: https://www.lua.org/pil/5.3.html 
-        -- (If the link above ends up invalid at any point, it's "Programming in Lua" Chapter 5.3: "Named Arguments")
-        set_bounds_to_items {}
-    end
+    -- set_bounds_to_items {empty = true}
+    -- set_bounds_to_items {}
 
     -- This changes the current render settings, but doesn't kick off the render process
     retval, dirty = ultraschall.ApplyRenderTable_Project(render_table)
@@ -55,9 +53,7 @@ function render(args)
     -- optional boolean AddToProj: true, add the rendered files to the project; nil or false, don't add them; will overwrite the settings in the RenderTable; will default to true, if no RenderTable is passed only has an effect, when rendering the current active project
     -- optional boolean CloseAfterRender: true or nil, closes rendering to file-dialog after rendering is finished; false, keep it open; will overwrite the settings in the RenderTable; will default to true, if no RenderTable is passed
     -- optional boolean SilentlyIncrementFilename; true or nil, silently increment filename, when file already exists; false, ask for overwriting; will overwrite the settings in the RenderTable; will default to true, if no RenderTable is passed
-    count, media_item_state_chunk_array, file_array = ultraschall.RenderProject_RenderTable(
-        nil, render_table, false, true, false
-    )
+    count, media_item_state_chunk_array, file_array = ultraschall.RenderProject_RenderTable(nil, render_table, false, true, false)
 
     -- Track: Unselect (clear selection of) all tracks
     reaper.Main_OnCommand(40297, 0)
@@ -72,7 +68,7 @@ function render_mix(rt, dir)
 
     if success ~= true then
         -- TODO: This is temporary. Handle this better.
-        reaper.ShowConsoleMsg("There was a problem printing.")
+        reaper.ShowConsoleMsg("There was a problem printing.\n")
         return false
     else
         return true
@@ -85,7 +81,7 @@ function render_mix_minus(rt, dir, file_name)
 
     if success ~= true then
         -- TODO: This is temporary. Handle this better.
-        reaper.ShowConsoleMsg("There was a problem printing.")
+        reaper.ShowConsoleMsg("There was a problem printing.\n")
         return false
     else
         return true
@@ -105,7 +101,7 @@ function render_stems(stems_table, rt, dir)
 
     if success ~= true then
         -- TODO: This is temporary. Handle this better.
-        reaper.ShowConsoleMsg("There was a problem printing.")
+        reaper.ShowConsoleMsg("There was a problem printing.\n")
         return false
     else
         return true
@@ -120,12 +116,11 @@ function render_stems_keep_silent(stems_table, rt, dir)
         reaper.SetTrackSelected(stem.media_track, true)
     end
 
-    -- function render(rt, dst_dir, file_name_arg, keep_silent_arg)
-    local success = render{rt=rt, dst_dir=dir, keep_silent_arg=true}
+    local success = render{rt=rt, dst_dir=dir, keep_silent=true}
 
     if success ~= true then
         -- TODO: This is temporary. Handle this better.
-        reaper.ShowConsoleMsg("There was a problem printing.")
+        reaper.ShowConsoleMsg("There was a problem printing.\n")
         return false
     else
         return true

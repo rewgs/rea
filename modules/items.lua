@@ -1,4 +1,10 @@
+-- FIXME: This is conflicting with Jon's workflow; perhaps ask for user input?
 function set_bounds_to_items(args)
+    -- `set_bounds_to_items()` takes a table called `args` for easier passing of named arguments.
+    -- Calling it with an empty `{}` denotes that all of the default parameter values will be used.
+    -- For more, see here: https://www.lua.org/pil/5.3.html 
+    -- (If the link above ends up invalid at any point, it's "Programming in Lua" Chapter 5.3: "Named Arguments")
+
     -- args
     local audio = args.audio or true                                                              -- default: true
     local click = args.click or false                                                             -- default: false

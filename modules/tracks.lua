@@ -236,7 +236,7 @@ function get_wide_stems(all_tracks)
     -- Includes folder tracks whose children are only muted tracks, or the track of which only 
     --  contain muted media items or don't contain any media items, i.e. stems that would print 
     --  silence.
-    -- To get *only* the stems that would print silence, run `get_wide_skinny_stems()` instead.
+    -- To get *only* the stems that would print silence, run `get_wide_silent_stems()` instead.
 
     local wide_stems = {}
     wide_stems.which = "wide"
@@ -264,8 +264,9 @@ function get_wide_stems(all_tracks)
         end
     end
 
+    -- debug
     -- for i, stem in ipairs(wide_stems) do
-    -- reaper.ShowConsoleMsg(stem.name .. "\n")
+    --     reaper.ShowConsoleMsg(stem.name .. "\n")
     -- end
 
     return wide_stems

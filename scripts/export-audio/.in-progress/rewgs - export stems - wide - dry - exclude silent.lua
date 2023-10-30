@@ -3,19 +3,19 @@ dofile(reaper.GetResourcePath() .. "/Scripts/rewgs-reaper-scripts/modules/init.l
 function main()
     reaper.Undo_BeginBlock()
     reaper.ClearConsole()
-    local action_name = 'rewgs - export stems wide wet'
+    local action_name = 'rewgs - export stems wide dry'
     local exports_path = "./exports/" .. parse_project_name().exports_folder_name .. "/renders/"
     local stems = get_wide_stems(get_all_tracks_as_objects())
-    local dst_dir = exports_path .. "stems - " .. stems.which .. " - wet"
+    local dst_dir = exports_path .. "stems - " .. stems.which .. " - dry"
 
-    -- ensures that Effects track is unmuted
+    -- mutes Effects track
     for _, track in ipairs(get_all_tracks_as_objects()) do
         if track.name == "Effects" and track.depth == 1 then
-            local muted = reaper.SetMediaTrackInfo_Value(track.media_track, "B_MUTE", 0)
+            local muted = reaper.SetMediaTrackInfo_Value(track.media_track, "B_MUTE", 1)
         end
     end
 
-    -- TODO: make sure the `misc_text` property of `parsed_project_name` isn't in the name of the resulting assets
+    set_bounds_to_items {}
     local success = render_stems(stems, rt_stems, dst_dir)
 
     reaper.Undo_EndBlock(action_name, -1)

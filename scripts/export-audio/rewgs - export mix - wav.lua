@@ -9,8 +9,7 @@ function main()
     local exports_folder = parsed_project_name.exports_folder_name
     local dst_dir = "./exports/" .. exports_folder .. "/renders/" .. "mixes"
 
-    -- TODO: make sure the `misc_text` property of `parsed_project_name` isn't in the name of the resulting assets
-    -- render_assets(exports_folder)
+    set_bounds_to_items {}
     local success = render_mix(rt_master_wav, dst_dir)
 
     reaper.Undo_EndBlock(action_name, -1)

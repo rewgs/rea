@@ -9,6 +9,7 @@ function print_render_table(rt)
     end
 end
 
+
 -- TODO: add error handling.
 --
 -- TODO: strip leading and trailing whitespace from track names. Maybe don't do it in this function, 
@@ -19,18 +20,12 @@ end
 -- NOTE: Changed this function to taking a single parameter table called `args`. Keeping the old 
 -- declaration with its parameters here for reference.
 --
--- function render(rt, dst_dir, file_name_arg, keep_silent_arg)
+-- function render(rt, dst_dir, file_name_arg)
 function render(args)
     -- args
     local rt = args.rt
     local dst_dir = args.dst_dir
     local file_name = args.file_name or rt.file_name
-    local keep_silent = args.keep_silent or false
-
-    -- reaper.ShowConsoleMsg(tostring(rt) .. "\n")
-    -- reaper.ShowConsoleMsg(tostring(dst_dir) .. "\n")
-    -- reaper.ShowConsoleMsg(tostring(file_name) .. "\n")
-    -- reaper.ShowConsoleMsg(tostring(keep_silent) .. "\n")
 
     local render_table = ultraschall.CreateNewRenderTable(
         rt.source, rt.bounds, rt.start_pos, rt.end_pos, rt.tail_flag, rt.tail_ms, dst_dir,
@@ -39,9 +34,6 @@ function render(args)
         rt.dither, rt.render_string, rt.silently_increment_filename, rt.add_to_proj,
         rt.save_copy_of_project, rt.render_queue_delay, rt.render_queue_delay_seconds, rt.close_after_render
     )
-
-    -- set_bounds_to_items {empty = true}
-    -- set_bounds_to_items {}
 
     -- This changes the current render settings, but doesn't kick off the render process
     retval, dirty = ultraschall.ApplyRenderTable_Project(render_table)
@@ -108,7 +100,7 @@ function render_stems(stems_table, rt, dir)
     end
 end
 
-function render_stems_keep_silent(stems_table, rt, dir)
+function render_stems_include_silent(stems_table, rt, dir)
     -- reaper.ShowConsoleMsg("Running render_stems()")
     for i, stem in ipairs(stems_table) do
         -- Note: this is ALL wide stems, including those that are muted/don't have items/etc
@@ -116,7 +108,7 @@ function render_stems_keep_silent(stems_table, rt, dir)
         reaper.SetTrackSelected(stem.media_track, true)
     end
 
-    local success = render{rt=rt, dst_dir=dir, keep_silent=true}
+    local success = render{rt=rt, dst_dir=dir}
 
     if success ~= true then
         -- TODO: This is temporary. Handle this better.

@@ -3,69 +3,59 @@ dofile(reaper.GetResourcePath() .. "/Scripts/rewgs-reaper-scripts/modules/track-
 function get_all_tracks_as_objects()
     -- returns all tracks in project as an object with the following properties:
     -- media_track
-    -- number
+    -- index
     -- name
     -- depth
     -- parent
     -- num_media_items
     -- is_selected
     -- track_mute_state
-    -- unmuted_media_items {
-    -- { media_item, index }
-    -- }
-    -- muted_media_items {
-    -- { media_item, index }
-    -- }
+    -- items = {
+    --      { 
+    --          media_item, 
+    --          index,
+    --          mute_state
+    --      }
+    --  }
 
     local all_tracks = {}
-
     for i = 0, reaper.CountTracks(0) - 1 do
-        local media_track = reaper.GetTrack(0, i)
+        local _media_track = reaper.GetTrack(0, i)
 
-        -- 0 = normal
-        -- 1 = track is a folder parent
+        --  0 = normal
+        --  1 = track is a folder parent
         -- -1 = track is the last in the innermost folder,
         -- -2 = track is the last in the innermost and next-innermost folders, etc...
-        local depth = reaper.GetMediaTrackInfo_Value(media_track, "I_FOLDERDEPTH")
-        local _, track_name = reaper.GetTrackName(media_track)
-        local parent = reaper.GetMediaTrackInfo_Value(media_track, "P_PARTRACK")
-        local num_media_items = reaper.CountTrackMediaItems(media_track)
-        local is_selected = reaper.IsTrackSelected(media_track)
-        local track_mute_state = reaper.GetMediaTrackInfo_Value(media_track, "B_MUTE")
+        local _depth = reaper.GetMediaTrackInfo_Value(_media_track, "I_FOLDERDEPTH")
+        local _, _name = reaper.GetTrackName(_media_track)
+        local _parent = reaper.GetMediaTrackInfo_Value(_media_track, "P_PARTRACK")
+        local _num_media_items = reaper.CountTrackMediaItems(_media_track)
+        local is_selected = reaper.IsTrackSelected(_media_track)
+        local track_mute_state = reaper.GetMediaTrackInfo_Value(_media_track, "B_MUTE")
 
-        local unmuted_media_items = {}
-        local muted_media_items = {}
-        for m = 0, num_media_items - 1 do
-            local media_item = reaper.GetMediaItem(0, m)
+        local _items = {}
+        for m = 0, _num_media_items - 1 do
+            local __item_obj = {}
+            local _media_item = reaper.GetMediaItem(0, m)
             -- NOTE: This genuienly does not work, nor does `"B_MUTE"`. This is literally broken in the API.
-            local mute_state = reaper.GetMediaItemInfo_Value(media_item, "B_MUTE_ACTUAL")
-            -- reaper.ShowConsoleMsg(track_name .. " media item #" .. tostring(m) .. " has a mute state of " .. mute_state .. "\n")
+            local _mute_state = reaper.GetMediaItemInfo_Value(_media_item, "B_MUTE_ACTUAL")
 
-            -- NOTE: Due to the above bug regarding mute_state, all media items are being added to unmuted_media_items
-            if mute_state == false then
-                local unmuted_media_item_obj = {}
-                unmuted_media_item_obj.media_item = media_item
-                unmuted_media_item_obj.index = m
-                table.insert(unmuted_media_items, unmuted_media_item_obj)
-            else
-                local muted_media_item_obj = {}
-                muted_media_item_obj.media_item = media_item
-                muted_media_item_obj.index = m
-                table.insert(muted_media_items, muted_media_item_obj)
-            end
+            __item_obj.index = m
+            __item_obj.media_item = _media_item
+            __item_obj.mute_state = _mute_state
+            table.insert(_items, __item_obj)
         end
 
         local track_obj = {
-            media_track = media_track,
-            number = i,
-            name = track_name,
-            depth = depth,
-            parent = parent,
+            media_track = _media_track,
+            index = i,
+            name = _name,
+            depth = _depth,
+            parent = _parent,
             is_selected = is_selected,
             track_mute_state = track_mute_state,
-            num_media_items = num_media_items,
-            unmuted_media_items = unmuted_media_items,
-            muted_media_items = muted_media_items
+            num_media_items = _num_media_items, -- this is redundant; delete and just run `#items` when needed
+            items = _items
         }
 
         table.insert(all_tracks, track_obj)
@@ -197,6 +187,19 @@ function create_named_audio_click_track()
     end
 end
 
+
+-- IN PROGRESS
+-- function remove_silent_stems(stems_table)
+--     for i, stem in ipairs(get_children_of(stems_table)) do
+--         if stem.num_media_items == 0 then
+--             table.remove(stems_table, i)
+--         else
+--             for 
+--         end
+--     end
+-- end
+
+
 function get_skinny_stems(all_tracks)
     -- Returns a table containing all folder tracks one level below "Music Sub Mix," except for 
     --  Orchestra and Effects.
@@ -280,23 +283,75 @@ end
 -- function get_silent_wide_stems(all_tracks)
 -- end
 
-function get_children_of_skinny_stems(all_tracks)
-    local skinny_stems = get_skinny_stems(get_all_tracks_as_objects())
 
-    local children_of_skinny_stems = {}
-    for i, track in ipairs(all_tracks) do
+function get_children_of(trk)
+    -- Takes a track (as returned in get_all_tracks_as_objects()), and returns all 
+    -- of its children (including children which are parent tracks themselves).
+
+    local children = {}
+    for i, track in ipairs(get_all_tracks_as_objects()) do
+        --  0 = normal
+        --  1 = track is a folder parent
+        -- -1 = track is the last in the innermost folder,
+        -- -2 = track is the last in the innermost and next-innermost folders, etc...
+        -- if track.media_track == trk.media_track then
+            -- reaper.ShowConsoleMsg("The index of " .. track.name .. " is " .. trk.index .. ".\n")
+        -- end
+        if track.parent == trk.media_track then
+            table.insert(children, track)
+        end
+    end
+
+    return children
+end
+
+
+-- MOST IMPORTANT FUNCTION TO FINISH RIGHT NOW
+function get_family_tree(t)
+    -- Takes a table `t` and returns a table `family` where each item in `t` is the value of key 
+    -- `parent`, and each child is added to a table `children` within table `family`, like so:
+    --
+    --  t {
+    --      item_0,
+    --      item_1,
+    --      item_2,
+    --      etc
+    --  }
+    --
+    --  family {
+    --      {
+    --          parent: item_0,
+    --          children: {
+    --              child_0,
+    --              child_1,
+    --              child_2,
+    --              etc
+    --      },
+    --      {
+    --          parent: item_0,
+    --          children: {
+    --              child_0,
+    --              child_1,
+    --              child_2,
+    --              etc
+    --      }
+    --  }
+
+    local family_tree = {}
+    for i, track in ipairs(get_all_tracks_as_objects()) do
+        local children = {}
         if track.depth <= 0 then
-            for j, stem in ipairs(skinny_stems) do
-                if get_parent_track_name(track.parent) == stem.name then
-                    -- FIXME: why isn't this block running?
-                    reaper.ShowConsoleMsg("asdf")
-                    table.insert(children_of_skinny_stems, track)
+            for j, item in ipairs(t) do
+                -- if get_parent_track_name(track.parent) == item.name then
+                if track.parent == item.media_track then
+                    reaper.ShowConsoleMsg(track.name .. "\n")
+                    table.insert(children, track)
                 end
             end
         end
     end
 
-    -- return children_of_skinny_stems
+    return family
 end
 
 function get_next_track_obj(current_track, all_tracks)

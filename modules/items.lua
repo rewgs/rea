@@ -93,12 +93,16 @@ function set_bounds_to_items(args)
     -- order for export-audio functions to work, so commenting this out is the short-term solution.
     -- reaper.Main_OnCommand(40290, 0) -- 'Time selection: Set time selection to items'
 
-    -- FIXME: maybe change this to "show only selected tracks?" or "show only tracks with selected items?"
+    -- NOTE: not sure which one of these is the move? Choose one of these three.
     -- 'Script: Track Visibility - Show only tracks with items.lua'
-    reaper.Main_OnCommand(reaper.NamedCommandLookup("_RS18025988e0ed4e2830abe9a10d91e47698d54b71"), 0)
+    -- reaper.Main_OnCommand(reaper.NamedCommandLookup("_RS18025988e0ed4e2830abe9a10d91e47698d54b71"), 0)
+    -- 'Script: Track Visibility - Show only selected tracks'
+    -- reaper.Main_OnCommand(reaper.NamedCommandLookup("_RS8f15fdf2ab91fdd3ef930734225dd0ebdcdc4fc4"), 0)
+    -- 'Script: Track Visibility - Show only tracks with selected items'
+    -- reaper.Main_OnCommand(reaper.NamedCommandLookup("_RS8372596f61228813cb56a5f174ace6a8da5c5167"), 0)
 
     -- Item: Unselect (clear selection of) all items
-    reaper.Main_OnCommand(40289, 0)
+    -- reaper.Main_OnCommand(40289, 0)
 
     if clear_track_selection_after_running then
         -- Track: Unselect (clear selection of) all tracks

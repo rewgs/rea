@@ -8,12 +8,7 @@ function main()
     local stems = get_skinny_stems(get_all_tracks_as_objects())
     local dst_dir = exports_path .. "stems - " .. stems.which .. " - dry"
 
-    -- mutes Effects track
-    for _, track in ipairs(get_all_tracks_as_objects()) do
-        if track.name == "Effects" and track.depth == 1 then
-            local muted = reaper.SetMediaTrackInfo_Value(track.media_track, "B_MUTE", 1)
-        end
-    end
+    mute_effects()
 
     set_bounds_to_items {}
     local success = render_stems(stems, rt_stems, dst_dir)

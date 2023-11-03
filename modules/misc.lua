@@ -36,3 +36,7 @@ function strip_whitespace_from_ends(str)
     local stripped_str = str:gsub("^%s*(.-)%s*$", "%1")
     return stripped_str
 end
+
+function reaprint(msg)
+    reaper.ShowConsoleMsg(tostring(msg) .. "\n")
+end

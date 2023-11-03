@@ -1,5 +1,43 @@
 dofile(reaper.GetResourcePath() .. "/Scripts/rewgs-reaper-scripts/modules/track-marks.lua")
 
+function get_all_tracks()
+    local all_tracks = get_all_tracks_as_objects()
+    for _, track in ipairs(all_tracks) do
+        track.children = get_children_of(track)
+    end
+
+    return all_tracks
+end
+
+function get_children_of(parent)
+    -- args:
+    -- track:
+    --  a track (as returned in get_all_tracks_as_objects() -- *not* a media_track (though,
+    --  `media_track` is a property of `track`)), and returns all of its children (including
+    --  children which are parent tracks themselves).
+    --
+    local children = {}
+    for i, track in ipairs(get_all_tracks_as_objects()) do
+        --  0 = normal
+        --  1 = track is a folder parent
+        -- -1 = track is the last in the innermost folder,
+        -- -2 = track is the last in the innermost and next-innermost folders, etc...
+        -- if track.media_track == parent.media_track then
+        -- reaper.ShowConsoleMsg("The index of " .. track.name .. " is " .. parent.index .. ".\n")
+        -- end
+        if track.parent == parent.media_track then
+            -- if track.depth == 1 then
+            -- local new_generation
+            -- get_children_of(track)
+            -- else
+            table.insert(children, track)
+            -- end
+        end
+    end
+
+    return children
+end
+
 function get_all_tracks_as_objects()
     -- returns all tracks in project as an object with the following properties:
     -- media_track
@@ -7,16 +45,22 @@ function get_all_tracks_as_objects()
     -- name
     -- depth
     -- parent
+    -- children = {
+    --      media_track,
+    --      index,
+    --      etc...
+    -- }
     -- num_media_items
     -- is_selected
     -- track_mute_state
     -- items = {
-    --      { 
-    --          media_item, 
+    --      {
+    --          media_item,
     --          index,
     --          mute_state
     --      }
-    --  }
+    -- }
+    --
 
     local all_tracks = {}
     for i = 0, reaper.CountTracks(0) - 1 do
@@ -62,6 +106,96 @@ function get_all_tracks_as_objects()
     end
 
     return all_tracks
+end
+
+function get_all_child_tracks(args)
+    local parents_to_ignore = args
+
+    local all_tracks = get_all_tracks_as_objects()
+    local child_tracks = {}
+
+    if parents_to_ignore ~= nil and #parents_to_ignore > 0 then
+        for _, track in ipairs(all_tracks) do
+            if not table_contains(parents_to_ignore, get_parent_track_name(track.parent)) and track.depth < 1 then
+                table.insert(child_tracks, track)
+            end
+        end
+    else
+        for _, track in ipairs(all_tracks) do
+            if track.depth < 1 then
+                table.insert(child_tracks, track)
+            end
+        end
+    end
+
+    return child_tracks
+end
+
+-- TODO
+function get_all_child_tracks_2(args)
+    -- Ignores all tracks, including other folders, below ignored parent tracks
+    -- NOTE: args is a table of strings representing track names to ignore
+
+    local function get_tracks_with_forbidden_parents(args)
+        local all_tracks = args.all_tracks
+        local parents_to_ignore = args.parents_to_ignore
+        local tracks_with_forbidden_parent = args.tracks_with_forbidden_parent
+
+        for _, track in ipairs(all_tracks) do
+            for _, p in ipairs(parents_to_ignore) do
+                if p == get_parent_track_name(track.parent) then
+                    if track.depth == 1 then
+                        table.insert(parents_to_ignore, track)
+                        -- FIXME:
+                        --  Currently this causes endless recursion due to the return statement.
+                        --  Need to return on a condition, ideally based on len of a table, but that's being buggy...
+                        tracks_with_forbidden_parent = get_tracks_with_forbidden_parents {
+                            all_tracks = all_tracks,
+                            parents_to_ignore = parents_to_ignore,
+                            tracks_with_forbidden_parent = tracks_with_forbidden_parent
+                        }
+                    else
+                        table.insert(tracks_with_forbidden_parent, track)
+                    end
+                end
+            end
+        end
+
+        return tracks_with_forbidden_parent
+    end
+
+    local all_tracks = get_all_tracks_as_objects()
+    local child_tracks = {}
+
+    if args ~= nil and #args > 0 then
+        local func_args = args
+        -- reaper.ShowConsoleMsg("Taking the if")
+        -- reaper.ShowConsoleMsg(tostring(#args) .. "\n")
+        local tracks_with_forbidden_parent = get_tracks_with_forbidden_parents {
+            all_tracks = all_tracks,
+            parents_to_ignore = func_args,
+            tracks_with_forbidden_parent = {}
+        }
+
+        -- for _, track in ipairs(tracks_with_forbidden_parent) do
+        -- reaper.ShowConsoleMsg(track.name .. " has a forbidden parent.\n")
+        -- end
+
+        for _, track in ipairs(all_tracks) do
+            if not table_contains(tracks_with_forbidden_parent, track) and track.depth < 1 then
+                table.insert(child_tracks, track)
+            end
+        end
+    else
+        -- reaper.ShowConsoleMsg("Taking the else")
+        for _, track in ipairs(all_tracks) do
+            if track.depth < 1 then
+                table.insert(child_tracks, track)
+            end
+        end
+    end
+
+    return child_tracks
 end
 
 function get_parent_track_name(parent_track)
@@ -187,25 +321,24 @@ function create_named_audio_click_track()
     end
 end
 
-
 -- IN PROGRESS
 -- function remove_silent_stems(stems_table)
 --     for i, stem in ipairs(get_children_of(stems_table)) do
 --         if stem.num_media_items == 0 then
 --             table.remove(stems_table, i)
 --         else
---             for 
+--             for
 --         end
 --     end
 -- end
 
 
 function get_skinny_stems(all_tracks)
-    -- Returns a table containing all folder tracks one level below "Music Sub Mix," except for 
+    -- Returns a table containing all folder tracks one level below "Music Sub Mix," except for
     --  Orchestra and Effects.
     --
-    -- Includes folder tracks whose children are only muted tracks, or the track of which only 
-    --  contain muted media items or don't contain any media items, i.e. stems that would print 
+    -- Includes folder tracks whose children are only muted tracks, or the track of which only
+    --  contain muted media items or don't contain any media items, i.e. stems that would print
     --  silence.
     -- To get *only* the stems that would print silence, run `get_silent_skinny_stems()` instead.
 
@@ -233,11 +366,11 @@ function get_skinny_stems(all_tracks)
 end
 
 function get_wide_stems(all_tracks)
-    -- Returns a table containing the lowest-depth folder tracks below those specified in 
+    -- Returns a table containing the lowest-depth folder tracks below those specified in
     --  `get_skinny_stems()`.
     --
-    -- Includes folder tracks whose children are only muted tracks, or the track of which only 
-    --  contain muted media items or don't contain any media items, i.e. stems that would print 
+    -- Includes folder tracks whose children are only muted tracks, or the track of which only
+    --  contain muted media items or don't contain any media items, i.e. stems that would print
     --  silence.
     -- To get *only* the stems that would print silence, run `get_wide_silent_stems()` instead.
 
@@ -275,40 +408,18 @@ function get_wide_stems(all_tracks)
     return wide_stems
 end
 
--- function get_silent_skinny_stems(all_tracks)
-    -- Returns a table containing only the stems returned by `get_skinny_stems()` that will print 
+function get_silent_skinny_stems()
+    -- Returns a table containing only the stems returned by `get_skinny_stems()` that will print
     --  silence.
--- end
-
--- function get_silent_wide_stems(all_tracks)
--- end
-
-
-function get_children_of(trk)
-    -- Takes a track (as returned in get_all_tracks_as_objects()), and returns all 
-    -- of its children (including children which are parent tracks themselves).
-
-    local children = {}
-    for i, track in ipairs(get_all_tracks_as_objects()) do
-        --  0 = normal
-        --  1 = track is a folder parent
-        -- -1 = track is the last in the innermost folder,
-        -- -2 = track is the last in the innermost and next-innermost folders, etc...
-        -- if track.media_track == trk.media_track then
-            -- reaper.ShowConsoleMsg("The index of " .. track.name .. " is " .. trk.index .. ".\n")
-        -- end
-        if track.parent == trk.media_track then
-            table.insert(children, track)
-        end
-    end
-
-    return children
+    print("Running get_silent_skinny_stems()")
 end
 
+function get_silent_wide_stems()
+    print("Running get_silent_wide_stems()")
+end
 
--- MOST IMPORTANT FUNCTION TO FINISH RIGHT NOW
 function get_family_tree(t)
-    -- Takes a table `t` and returns a table `family` where each item in `t` is the value of key 
+    -- Takes a table `t` and returns a table `family` where each item in `t` is the value of key
     -- `parent`, and each child is added to a table `children` within table `family`, like so:
     --
     --  t {
@@ -351,7 +462,7 @@ function get_family_tree(t)
         end
     end
 
-    return family
+    return family_tree
 end
 
 function get_next_track_obj(current_track, all_tracks)
@@ -393,7 +504,6 @@ function get_child_folder_tracks_of(parent_folder_track, next_folder_track, all_
     --     end
     -- end
 end
-
 
 function get_tracks_to_print()
     local tracks_to_print = {}
@@ -531,7 +641,7 @@ function export_marked_tracks(marked_tracks)
     reaper.Main_OnCommand(40849, 0)
 end
 
--- FIXME: This function is acting a little weird, not always firing. Just adapting the meat of this 
+-- FIXME: This function is acting a little weird, not always firing. Just adapting the meat of this
 -- function and straight-forwardly calling the SetMediaTrackInfo_Value() function whenever needed.
 function toggle_effects_track_mute_state()
     for _, track in ipairs(get_all_tracks_as_objects()) do
@@ -543,9 +653,25 @@ function toggle_effects_track_mute_state()
                 muted = reaper.SetMediaTrackInfo_Value(track.media_track, "B_MUTE", 0)
             end
             return muted
-        -- else
+            -- else
             -- TODO: better error handling.
             -- reaper.ShowConsoleMsg("Could not find a track called Effects. Please try again.")
+        end
+    end
+end
+
+function unmute_effects()
+    for _, track in ipairs(get_all_tracks_as_objects()) do
+        if track.name == "Effects" and track.depth == 1 then
+            local mute_state = reaper.SetMediaTrackInfo_Value(track.media_track, "B_MUTE", 0)
+        end
+    end
+end
+
+function mute_effects()
+    for _, track in ipairs(get_all_tracks_as_objects()) do
+        if track.name == "Effects" and track.depth == 1 then
+            local mute_state = reaper.SetMediaTrackInfo_Value(track.media_track, "B_MUTE", 1)
         end
     end
 end

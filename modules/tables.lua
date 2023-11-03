@@ -1,10 +1,39 @@
-function is_list_like(tbl)
+function is_list_like(t)
     local i = 0
-    for _ in pairs(tbl) do
+    for _ in pairs(t) do
         i = i + 1
-        if tbl[i] == nil then return false end
+        if t[i] == nil then
+            return false
+        end
     end
     return true
+end
+
+function recursively_traverse(t)
+    -- Recursively traverses the members of both list-like and dict-like tables.
+    if type(t) ~= "table" then
+        reaprint("recurisvely_traverse() requires that its arg be a table!")
+        -- reaprint(t)
+    else
+        -- reaprint("t is a table")
+        local table_type = is_list_like(t)
+        if table_type then -- list-like table
+            reaprint("t is a list-like table")
+            for i, x in ipairs(t) do
+                if type(x) == "table" then
+                    recursively_traverse(x)
+                end
+            end
+        else
+            reaprint("t is a dict-like table")
+            local index = {}
+            for k, v in pairs(t) do
+                if type(k) == "table" then
+                    recursively_traverse(k)
+                end
+            end
+        end
+    end
 end
 
 function recursively_search(search_term, input)
@@ -86,4 +115,13 @@ function remove_duplicates_from_table(t)
         end
     end
     return res
+end
+
+function table_contains(table, value)
+    for i = 1, #table do
+        if (table[i] == value) then
+            return true
+        end
+    end
+    return false
 end

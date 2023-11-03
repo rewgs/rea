@@ -11,7 +11,7 @@ function main()
     local action_name = 'rewgs - export all child tracks - wet'
 
     local exports_path = "./exports/" .. parse_project_name().exports_folder_name .. "/renders/"
-    local dst_dir = exports_path .. "all child tracks - " .. " - wet"
+    local dst_dir = exports_path .. "all child tracks - wet"
 
     unmute_effects()
 
@@ -24,7 +24,7 @@ function main()
     --     reaper.ShowConsoleMsg(track.name .. "\n")
     -- end
 
-    -- local success = render_stems(child_tracks, rt_stems, dst_dir)
+    local success = render_stems(child_tracks, rt_stems, dst_dir)
 
     reaper.Undo_EndBlock(action_name, -1)
 

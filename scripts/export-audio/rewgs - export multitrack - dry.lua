@@ -45,7 +45,7 @@ function get_relatives(all_tracks, children, potential_ancestors)
                 -- reaprint(tostring(retval))
                 -- reaprint("\t" .. c.name)
                 -- reaprint("\t" .. p.name)
-                local relation = {c, p}
+                local relation = { c, p }
                 table.insert(relatives, relation)
             end
         end
@@ -61,7 +61,7 @@ function main()
 
     local exports_path = "./exports/" .. parse_project_name().exports_folder_name .. "/renders/"
     local export_type = "dry"
-    local dst_dir = exports_path .. "all child tracks - " .. export_type
+    local dst_dir = exports_path .. "multitrack - " .. export_type
 
     mute_effects()
 
@@ -82,13 +82,20 @@ function main()
             if track.media_track == r[1].media_track then
                 -- $skinny stem - $parent - $track - $wet/dry - $project - $starttc
                 local skinny_stem_name = r[2].name
-                local track_name = track.name:match'^%s*(.*%S)' or '' -- strips trailing and leading whitespace
-                local file_name = skinny_stem_name .. names.delimiter .. get_parent_track_name(track.parent) .. names.delimiter .. track_name .. names.delimiter .. export_type .. names.delimiter .. p.project_code .. names.delimiter .. p.cue_number .. names.delimiter .. p.cue_name .. names.delimiter .. p.cue_version .. names.delimiter .. "$starttc"
+                local track_name = track.name:match '^%s*(.*%S)' or '' -- strips trailing and leading whitespace
+                local file_name = skinny_stem_name .. names.delimiter
+                    .. get_parent_track_name(track.parent) .. names.delimiter
+                    .. track_name .. names.delimiter
+                    .. export_type .. names.delimiter
+                    .. p.project_code .. names.delimiter
+                    .. p.cue_number .. names.delimiter
+                    .. p.cue_name .. names.delimiter
+                    .. p.cue_version .. names.delimiter .. "$starttc"
                 -- reaper.ShowConsoleMsg(file_name .. "\n")
 
                 local success = render_multitrack(all_tracks, track, rt_multitrack, dst_dir, file_name)
                 if success ~= true then
-                -- TODO: This is temporary. Handle this better.
+                    -- TODO: This is temporary. Handle this better.
                     reaper.ShowConsoleMsg("There was a problem printing" .. track.name .. "\n")
                 end
             end

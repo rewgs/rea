@@ -2,7 +2,7 @@ A collection of hopefully useful Reaper scripts.
 
 Note: Files in `scripts` are meant to be called by the user. Files in `modules` are referenced by the files in `scripts`, and thus are not intended to be touched by the user; these will eventually be split out into their own repo.
 
-**Be sure to check the [changelog](./CHANGELOG.md)
+**Be sure to check the [changelog](./CHANGELOG.md).**
 
 # Installation
 - Install the Ultraschall API -- it's a required dependency.

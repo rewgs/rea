@@ -108,6 +108,8 @@ function get_all_tracks_as_objects()
     return all_tracks
 end
 
+-- args are parent tracks to ignore i.e. not include them or their child tracks in `child_tracks`
+-- TODO: This currently only ignores immediate non-folder children of the ignored parent; folders under parent are not ignored.
 function get_all_child_tracks(args)
     local parents_to_ignore = args
 

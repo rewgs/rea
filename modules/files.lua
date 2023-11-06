@@ -7,4 +7,3 @@ function write_to_file(file, text)
         file:close()
     end
 end
-

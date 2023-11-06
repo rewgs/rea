@@ -33,7 +33,7 @@ local num_found_dirs, dirs_array, num_found_files, files_array = ultraschall.Get
 -- Never imports the name of the file that's calling it -- this allows modules to use the same
 -- `dofile()` line as scripts: dofile(reaper.GetResourcePath() .. "/Scripts/rewgs-reaper-scripts/modules/init.lua")
 -- TODO: filter only .lua files
-for i, file in ipairs(files_array) do
+for _, file in ipairs(files_array) do
     if file ~= this_file_path then
         -- reaper.ShowConsoleMsg(file .. "\n")
         dofile(file)

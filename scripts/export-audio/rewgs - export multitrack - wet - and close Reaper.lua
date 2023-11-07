@@ -84,6 +84,10 @@ function main()
                 local track_name = track.name:match '^%s*(.*%S)' or '' -- strips trailing and leading whitespace
                 local file_name = skinny_stem_name .. names.delimiter
                     .. get_parent_track_name(track.parent) .. names.delimiter
+                    -- NOTE: added index so that overwrites don't pause the app. 
+                    -- The render table SHOULD be preventing overwrites, but 
+                    -- it's not. This is admittedly not a great fix, but it'll 
+                    -- do for now.
                     .. track.index .. names.delimiter
                     .. track_name .. names.delimiter
                     .. export_type .. names.delimiter

@@ -85,6 +85,7 @@ function main()
                 local track_name = track.name:match '^%s*(.*%S)' or '' -- strips trailing and leading whitespace
                 local file_name = skinny_stem_name .. names.delimiter
                     .. get_parent_track_name(track.parent) .. names.delimiter
+                    .. track.index .. names.delimiter
                     .. track_name .. names.delimiter
                     .. export_type .. names.delimiter
                     .. p.project_code .. names.delimiter

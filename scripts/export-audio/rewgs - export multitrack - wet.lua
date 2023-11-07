@@ -106,3 +106,4 @@ function main()
 end
 
 main()
+-- reaper.Main_OnCommand(40004, 0) -- closes Reaper

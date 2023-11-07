@@ -1,6 +1,5 @@
 -- Export every non-parent/folder track
 -- Put in file name: name of skinny stem (i.e. folder track that outputs to Music Sub Mix)
--- NOTE: ALSO do this DRY
 
 dofile(reaper.GetResourcePath() .. "/Scripts/rewgs-reaper-scripts/modules/init.lua")
 local p = parse_project_name()
@@ -57,10 +56,10 @@ function main()
     reaper.Undo_BeginBlock()
     reaper.ClearConsole()
 
-    local action_name = 'rewgs - export all child tracks - dry'
+    local action_name = 'rewgs - export all child tracks - wet'
 
     local exports_path = "./exports/" .. parse_project_name().exports_folder_name .. "/renders/"
-    local export_type = "dry"
+    local export_type = "wet"
     local dst_dir = exports_path .. "multitrack - " .. export_type
 
     mute_effects()
@@ -85,6 +84,7 @@ function main()
                 local track_name = track.name:match '^%s*(.*%S)' or '' -- strips trailing and leading whitespace
                 local file_name = skinny_stem_name .. names.delimiter
                     .. get_parent_track_name(track.parent) .. names.delimiter
+                    .. track.index .. names.delimiter
                     .. track_name .. names.delimiter
                     .. export_type .. names.delimiter
                     .. p.project_code .. names.delimiter

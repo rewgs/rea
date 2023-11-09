@@ -19,3 +19,5 @@ The files `modules/Some_Namespace.lua` and `.tests/namespaces_test.lua` show how
 Some good info:
 - https://stackoverflow.com/questions/4394303/how-to-make-namespace-in-lua
 - https://www.lua.org/pil/15.2.html
+
+- UI inspiration: nvk_CREATE

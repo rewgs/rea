@@ -1,6 +1,6 @@
 # Rea - Rewgs' Collection of Hopefully Useful Reaper Scripts
 
-Formerly called `rewgs-reaper-scripts`. Powered by [reaify](https://github.com/rewgs/reaify).
+Formerly called `rewgs-reaper-scripts`. Powered by [`reaify`](https://github.com/rewgs/reaify).
 
 ## Notes
 
